@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QUO_DOC // MoM_EDITOR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@300;400;500&amp;family=JetBrains+Mono:wght@300;400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#000000",
+                        "surface": "#f9f9f9",
+                        "surface-container": "#eeeeee",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#1a1c1c",
+                        "outline": "#777777",
+                        "outline-variant": "#c6c6c6",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Custom scrollbar for the architectural look */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f9f9f9; }
+        ::-webkit-scrollbar-thumb { background: #000000; }
+    </style>
+</head>
+<body class="font-body selection:bg-primary selection:text-white font-light">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full border-b border-black bg-white z-50 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-8">
+<span class="font-['JetBrains_Mono'] font-medium text-lg tracking-tighter text-black">QUO_DOC</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-gray-500 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white transition-colors duration-100 px-2 py-1" href="#">Drafts</a>
+<a class="text-gray-500 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white transition-colors duration-100 px-2 py-1" href="#">Archive</a>
+<a class="text-black border-b border-black pb-1 font-['Inter'] font-semibold text-sm" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="p-2 hover:bg-black hover:text-white transition-colors duration-100">
+<span class="material-symbols-outlined text-sm">history</span>
+</button>
+<button class="p-2 hover:bg-black hover:text-white transition-colors duration-100">
+<span class="material-symbols-outlined text-sm">print</span>
+</button>
+</div>
+<button class="bg-black text-white px-4 py-2 font-['Inter'] font-medium text-sm hover:bg-gray-800 transition-colors">
+                New Document
+            </button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 border-r border-black bg-neutral-50 flex flex-col py-8 z-40">
+<div class="px-6 mb-8">
+<div class="font-['Inter'] font-semibold text-xl mb-1">OPERATOR_01</div>
+<div class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest opacity-60 font-light">V.2.4.0_STABLE</div>
+</div>
+<nav class="flex-1">
+<a class="text-black px-4 py-3 flex items-center gap-3 opacity-60 hover:bg-neutral-200 transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest font-normal" href="#">
+<span class="material-symbols-outlined">grid_view</span> Dashboard
+            </a>
+<a class="text-black px-4 py-3 flex items-center gap-3 opacity-60 hover:bg-neutral-200 transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest font-normal" href="#">
+<span class="material-symbols-outlined">format_quote</span> Quotations
+            </a>
+<a class="bg-black text-white font-medium px-4 py-3 flex items-center gap-3 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">description</span> Documents
+            </a>
+<a class="text-black px-4 py-3 flex items-center gap-3 opacity-60 hover:bg-neutral-200 transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest font-normal" href="#">
+<span class="material-symbols-outlined">layers</span> Templates
+            </a>
+<a class="text-black px-4 py-3 flex items-center gap-3 opacity-60 hover:bg-neutral-200 transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest font-normal" href="#">
+<span class="material-symbols-outlined">terminal</span> System_Logs
+            </a>
+</nav>
+<div class="px-4 mt-auto pt-4 border-t border-outline-variant">
+<a class="text-black px-4 py-2 flex items-center gap-3 opacity-60 hover:bg-neutral-200 transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest font-normal" href="#">
+<span class="material-symbols-outlined">help_outline</span> Support
+            </a>
+<a class="text-black px-4 py-2 flex items-center gap-3 opacity-60 hover:bg-neutral-200 transition-colors font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest font-normal" href="#">
+<span class="material-symbols-outlined">code</span> Terminal
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Column: Key Takeaways & Action Items -->
+<section class="w-80 border-r border-black flex flex-col bg-surface overflow-y-auto">
+<!-- AI Takeaways Section -->
+<div class="p-6 border-b border-black">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<h2 class="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">AI_KEY_TAKEAWAYS</h2>
+</div>
+<div class="space-y-6">
+<div class="p-4 bg-white border border-black group hover:bg-primary hover:text-white transition-colors cursor-default">
+<div class="font-mono text-[10px] mb-2 opacity-60 group-hover:opacity-100 font-light">01_STRATEGY</div>
+<p class="text-xs leading-relaxed font-body font-light">Q4 pivot towards architectural minimalism confirmed across all product tiers.</p>
+</div>
+<div class="p-4 bg-white border border-black group hover:bg-primary hover:text-white transition-colors cursor-default">
+<div class="font-mono text-[10px] mb-2 opacity-60 group-hover:opacity-100 font-light">02_BUDGET</div>
+<p class="text-xs leading-relaxed font-body font-light">Incremental 15% allocation for R&amp;D on monochrome aesthetic performance.</p>
+</div>
+</div>
+</div>
+<!-- Action Items Section -->
+<div class="p-6 flex-1 bg-surface-container">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">task_alt</span>
+<h2 class="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">ACTION_ITEMS</h2>
+</div>
+<ul class="space-y-2">
+<li class="flex items-start gap-3 group">
+<div class="mt-1 w-3 h-3 border border-black bg-white flex-shrink-0"></div>
+<span class="text-xs font-mono uppercase tracking-tight group-hover:underline cursor-pointer font-light">Update_Design_System_V3</span>
+</li>
+<li class="flex items-start gap-3 group">
+<div class="mt-1 w-3 h-3 border border-black bg-white flex-shrink-0"></div>
+<span class="text-xs font-mono uppercase tracking-tight group-hover:underline cursor-pointer font-light">Notify_Stakeholders_Archive</span>
+</li>
+<li class="flex items-start gap-3 group">
+<div class="mt-1 w-3 h-3 border border-black bg-black flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[10px]">check</span>
+</div>
+<span class="text-xs font-mono uppercase tracking-tight line-through opacity-40 font-light">Finalize_Blueprint_Layout</span>
+</li>
+</ul>
+</div>
+</section>
+<!-- Middle Column: Terminal Writing Area -->
+<section class="flex-1 flex flex-col bg-white">
+<div class="h-10 border-b border-black flex items-center px-4 justify-between bg-surface">
+<div class="flex items-center gap-4">
+<div class="flex gap-1.5">
+<div class="w-2 h-2 bg-black"></div>
+<div class="w-2 h-2 bg-outline-variant"></div>
+<div class="w-2 h-2 bg-outline-variant"></div>
+</div>
+<span class="font-mono text-[10px] opacity-60 tracking-widest font-light">EDITOR_SESSION: 0X_F43</span>
+</div>
+<div class="font-mono text-[10px] tracking-widest font-light">WORDS: 142</div>
+</div>
+<div class="flex-1 p-10 overflow-y-auto">
+<textarea class="w-full h-full border-none focus:ring-0 font-mono text-sm leading-8 text-on-surface resize-none p-0 placeholder:opacity-30 font-light" placeholder="// START TYPING MEETING MINUTES HERE...">MEETING_SUBJECT: ARCHITECTURAL_PIVOT_SYMPOSIUM
+DATE: 2023.10.12
+ATTENDEES: @LEAD_ARCHITECT, @PRODUCT_OWNER, @UX_RESEARCH
+
+SUMMARY:
+The team convened to discuss the transition from soft UI patterns to the new "Digital Blueprint" framework. 
+
+DISCUSSION_POINTS:
+- Removal of all border-radius tokens (Set to 0px).
+- Eradication of drop shadows in favor of 1px stroke boundaries.
+- Monospace font usage for all metadata and data-dense blocks.
+
+CONCERNS:
+- Accessibility of high-contrast monochrome for long-form reading.
+- Strategy: Use #1A1C1C for body text instead of #000000.
+
+NEXT_STEPS:
+- Prototype the "Zen-Editor" for Document Management.
+- Validate with the core dev team for terminal-inspired aesthetics.</textarea>
+</div>
+</section>
+<!-- Right Column: Live Preview -->
+<section class="w-[450px] border-l border-black bg-surface-container flex flex-col">
+<div class="h-10 border-b border-black flex items-center px-4 bg-white">
+<span class="font-mono text-[11px] font-semibold uppercase tracking-widest">LIVE_PREVIEW</span>
+</div>
+<div class="flex-1 p-8 overflow-y-auto bg-[#F2F2F2]">
+<!-- Document Paper -->
+<div class="bg-white p-12 shadow-sm border border-outline-variant min-h-full">
+<header class="border-b border-black pb-4 mb-8">
+<div class="flex justify-between items-baseline mb-2">
+<h1 class="font-headline font-semibold text-2xl tracking-tighter">MINUTES OF MEETING</h1>
+<span class="font-mono text-[10px] font-medium">DOC_ID: 994-01</span>
+</div>
+<div class="flex gap-6 font-label text-[10px] uppercase tracking-widest opacity-60 font-light">
+<span>2023.10.12</span>
+<span>ROOM: VIRTUAL_B</span>
+</div>
+</header>
+<div class="space-y-8">
+<div>
+<h3 class="font-mono text-[11px] font-semibold mb-3 border-b border-outline-variant pb-1">OVERVIEW</h3>
+<p class="font-body text-xs leading-relaxed text-on-surface font-light">Formalization of the Architectural Minimalism design system. Strategic alignment on the "Digital Blueprint" creative direction for upcoming product releases.</p>
+</div>
+<div>
+<h3 class="font-mono text-[11px] font-semibold mb-3 border-b border-outline-variant pb-1">DECISIONS</h3>
+<div class="border-l border-black pl-4 py-1 space-y-4">
+<div class="text-xs font-body italic font-light">"The system will strictly adhere to a 1px stroke limit for all structural dividers."</div>
+<div class="text-xs font-body italic font-light">"Inter will remain the primary display font with tightened tracking."</div>
+</div>
+</div>
+<div class="pt-8 border-t border-dashed border-outline-variant">
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 bg-surface border border-outline-variant">
+<div class="font-mono text-[9px] opacity-60 mb-1 font-light">SIGNATORY_A</div>
+<div class="font-label text-[11px] font-semibold tracking-widest uppercase">Lead Architect</div>
+</div>
+<div class="p-4 bg-surface border border-outline-variant">
+<div class="font-mono text-[9px] opacity-60 mb-1 font-light">SIGNATORY_B</div>
+<div class="font-label text-[11px] font-semibold tracking-widest uppercase">Project Lead</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Footer Metadata -->
+<div class="p-4 bg-black text-white">
+<div class="flex justify-between font-mono text-[9px] tracking-[0.2em] font-light">
+<span>STATUS: DRAFT_MODIFIED</span>
+<span>ENCRYPTION: AES-256</span>
+</div>
+</div>
+</section>
+</main>
+</body></html>

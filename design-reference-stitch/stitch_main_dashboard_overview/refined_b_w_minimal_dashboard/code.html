@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#5e5e5e",
+                        "secondary-fixed": "#c6c6c6",
+                        "primary-fixed-dim": "#474747",
+                        "on-tertiary-fixed-variant": "#e2e2e2",
+                        "on-primary-fixed": "#ffffff",
+                        "primary-container": "#3b3b3b",
+                        "surface-container": "#eeeeee",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-secondary-fixed": "#1b1b1b",
+                        "on-primary": "#e2e2e2",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#dadada",
+                        "tertiary": "#3b3b3b",
+                        "on-surface": "#1a1c1c",
+                        "secondary": "#5e5e5e",
+                        "background": "#f9f9f9",
+                        "primary-fixed": "#5e5e5e",
+                        "on-secondary-container": "#1b1b1b",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary-fixed": "#5e5e5e",
+                        "on-tertiary-fixed": "#ffffff",
+                        "primary": "#000000",
+                        "secondary-fixed-dim": "#ababab",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c6c6c6",
+                        "on-primary-container": "#ffffff",
+                        "on-tertiary-container": "#ffffff",
+                        "inverse-on-surface": "#f0f1f1",
+                        "secondary-container": "#d4d4d4",
+                        "on-background": "#1a1c1c",
+                        "tertiary-container": "#747474",
+                        "on-error-container": "#410002",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary-fixed-variant": "#3b3b3b",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#474747",
+                        "tertiary-fixed-dim": "#474747",
+                        "surface-variant": "#e2e2e2",
+                        "inverse-primary": "#c6c6c6",
+                        "surface": "#f9f9f9",
+                        "surface-container-high": "#e8e8e8",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f4",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#e2e2e2",
+                        "outline": "#777777",
+                        "on-tertiary": "#e2e2e2"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+        }
+        * {
+            border-radius: 0px !important;
+        }
+        h1, h2, h3, h4 {
+            font-weight: 400 !important;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full border-b border-black dark:border-white z-50 bg-white dark:bg-black h-16 flex justify-between items-center px-6">
+<div class="flex items-center gap-8">
+<span class="font-['JetBrains_Mono'] font-medium text-lg tracking-tighter text-black dark:text-white">QUO_DOC</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-gray-500 dark:text-gray-400 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white transition-colors duration-100 px-2 py-1" href="#">Drafts</a>
+<a class="text-gray-500 dark:text-gray-400 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white transition-colors duration-100 px-2 py-1" href="#">Archive</a>
+<a class="text-gray-500 dark:text-gray-400 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white transition-colors duration-100 px-2 py-1" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2 mr-4">
+<span class="material-symbols-outlined cursor-pointer hover:bg-black hover:text-white p-1" data-icon="history">history</span>
+<span class="material-symbols-outlined cursor-pointer hover:bg-black hover:text-white p-1" data-icon="print">print</span>
+</div>
+<button class="bg-primary text-white px-4 py-2 text-sm font-normal uppercase tracking-widest hover:bg-white hover:text-black border border-black transition-all">
+            New Document
+        </button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 border-r border-black dark:border-white bg-neutral-50 dark:bg-neutral-900 flex flex-col py-8 z-40">
+<div class="px-6 mb-8">
+<h2 class="font-['Inter'] font-normal text-xl leading-none">OPERATOR_01</h2>
+<p class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest opacity-60">V.2.4.0_STABLE</p>
+</div>
+<nav class="flex-grow">
+<!-- Active Tab: Dashboard -->
+<a class="bg-black text-white dark:bg-white dark:text-black font-normal px-4 py-3 flex items-center gap-3 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span>Dashboard</span>
+</a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="format_quote">format_quote</span>
+<span>Quotations</span>
+</a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Documents</span>
+</a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span>Templates</span>
+</a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span>System_Logs</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-2">
+<button class="w-full border border-black py-2 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-black hover:text-white transition-all">Quick_Action</button>
+<div class="pt-4 border-t border-black/10">
+<a class="text-black dark:text-white px-2 py-2 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:opacity-100" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</a>
+<a class="text-black dark:text-white px-2 py-2 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:opacity-100" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="code">code</span>
+<span>Terminal</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-12 min-h-screen relative">
+<!-- Floating Command Bar -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-30 bg-white border border-black px-6 py-3 flex items-center gap-8 shadow-none">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-['JetBrains_Mono'] text-xs w-48 uppercase tracking-widest font-normal" placeholder="COMMAND_INPUT..." type="text"/>
+</div>
+<div class="h-4 w-px bg-black/20"></div>
+<div class="flex gap-4">
+<button class="font-['JetBrains_Mono'] text-[10px] font-normal uppercase hover:underline underline-offset-4">GOTO_DOC</button>
+<button class="font-['JetBrains_Mono'] text-[10px] font-normal uppercase hover:underline underline-offset-4">NEW_QUOTE</button>
+</div>
+</div>
+<div class="max-w-7xl mx-auto pt-16">
+<!-- Dashboard Header -->
+<div class="mb-20 grid grid-cols-12 gap-8 items-end">
+<div class="col-span-12 md:col-span-8">
+<h1 class="text-[5rem] font-light leading-[0.9] tracking-tighter uppercase font-headline mb-4">Dashboard</h1>
+<div class="flex gap-4 items-center">
+<span class="bg-black text-white px-3 py-1 font-mono text-[10px] uppercase tracking-widest font-normal">Active_Session</span>
+<span class="font-mono text-[10px] uppercase tracking-widest text-outline">00:42:12_UPTIME</span>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 border-l border-black pl-8">
+<p class="font-mono text-[10px] uppercase tracking-widest text-outline mb-2">Architectural Summary</p>
+<p class="text-sm font-light leading-relaxed">System operational. 12 pending approvals. All primary data nodes synced to cloud-mesh. Zero latency detected in quotation processing engine.</p>
+</div>
+</div>
+<!-- Metric Cards Bento Grid -->
+<div class="grid grid-cols-12 gap-px bg-black border border-black mb-20">
+<div class="col-span-12 md:col-span-4 bg-white p-8 group hover:bg-black hover:text-white transition-colors duration-200">
+<p class="font-mono text-[10px] uppercase tracking-widest mb-12 flex justify-between">
+                    Total_Revenue
+                    <span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+</p>
+<p class="text-[3.5rem] font-light tracking-tighter leading-none mb-2">124.8K</p>
+<p class="font-mono text-[10px] opacity-60">+12.4% FROM_LAST_MONTH</p>
+</div>
+<div class="col-span-12 md:col-span-4 bg-white p-8 group hover:bg-black hover:text-white transition-colors duration-200">
+<p class="font-mono text-[10px] uppercase tracking-widest mb-12 flex justify-between">
+                    Active_Quotes
+                    <span class="material-symbols-outlined text-sm" data-icon="file_open">file_open</span>
+</p>
+<p class="text-[3.5rem] font-light tracking-tighter leading-none mb-2">42</p>
+<p class="font-mono text-[10px] opacity-60">8_REQUIRING_ATTENTION</p>
+</div>
+<div class="col-span-12 md:col-span-4 bg-white p-8 group hover:bg-black hover:text-white transition-colors duration-200">
+<p class="font-mono text-[10px] uppercase tracking-widest mb-12 flex justify-between">
+                    Doc_Templates
+                    <span class="material-symbols-outlined text-sm" data-icon="layers">layers</span>
+</p>
+<p class="text-[3.5rem] font-light tracking-tighter leading-none mb-2">156</p>
+<p class="font-mono text-[10px] opacity-60">STABLE_SYSTEM_LIBRARY</p>
+</div>
+</div>
+<!-- Recent Activity Table -->
+<section class="mb-20">
+<div class="flex justify-between items-end mb-8">
+<h3 class="font-headline font-light text-2xl uppercase tracking-tighter">RECENT_ACTIVITY</h3>
+<div class="flex gap-4 border-b border-black pb-2">
+<button class="font-mono text-[10px] font-normal uppercase">All_Files</button>
+<button class="font-mono text-[10px] font-normal uppercase opacity-40">Quotations</button>
+<button class="font-mono text-[10px] font-normal uppercase opacity-40">Drafts</button>
+</div>
+</div>
+<div class="border-t border-black overflow-hidden">
+<table class="w-full text-left font-['Inter']">
+<thead>
+<tr class="font-mono text-[10px] uppercase tracking-widest bg-neutral-100 border-b border-black font-normal">
+<th class="py-4 px-6 font-normal">Document_ID</th>
+<th class="py-4 px-6 font-normal">Client_Entity</th>
+<th class="py-4 px-6 font-normal">Status</th>
+<th class="py-4 px-6 font-normal">Value</th>
+<th class="py-4 px-6 font-normal text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-neutral-200 font-light">
+<tr class="hover:bg-black hover:text-white transition-colors group cursor-pointer">
+<td class="py-6 px-6 font-mono text-[11px]">#DOC-2024-001</td>
+<td class="py-6 px-6 font-normal uppercase text-sm">Nexus Industries Ltd.</td>
+<td class="py-6 px-6">
+<span class="border border-black group-hover:border-white px-2 py-1 font-mono text-[9px] uppercase tracking-tighter">PENDING_APPROVAL</span>
+</td>
+<td class="py-6 px-6 font-mono text-sm">$12,450.00</td>
+<td class="py-6 px-6 text-right">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-black hover:text-white transition-colors group cursor-pointer">
+<td class="py-6 px-6 font-mono text-[11px]">#QT-2024-882</td>
+<td class="py-6 px-6 font-normal uppercase text-sm">Solaris Research Group</td>
+<td class="py-6 px-6">
+<span class="bg-black text-white group-hover:bg-white group-hover:text-black px-2 py-1 font-mono text-[9px] uppercase tracking-tighter">FINALIZED</span>
+</td>
+<td class="py-6 px-6 font-mono text-sm">$3,200.00</td>
+<td class="py-6 px-6 text-right">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-black hover:text-white transition-colors group cursor-pointer">
+<td class="py-6 px-6 font-mono text-[11px]">#DOC-2024-005</td>
+<td class="py-6 px-6 font-normal uppercase text-sm">Veridian Global</td>
+<td class="py-6 px-6">
+<span class="border border-black group-hover:border-white px-2 py-1 font-mono text-[9px] uppercase tracking-tighter">DRAFT_MODE</span>
+</td>
+<td class="py-6 px-6 font-mono text-sm">$48,000.00</td>
+<td class="py-6 px-6 text-right">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-black hover:text-white transition-colors group cursor-pointer">
+<td class="py-6 px-6 font-mono text-[11px]">#QT-2024-901</td>
+<td class="py-6 px-6 font-normal uppercase text-sm">Atlas Infrastructure</td>
+<td class="py-6 px-6">
+<span class="bg-black text-white group-hover:bg-white group-hover:text-black px-2 py-1 font-mono text-[9px] uppercase tracking-tighter">FINALIZED</span>
+</td>
+<td class="py-6 px-6 font-mono text-sm">$21,500.00</td>
+<td class="py-6 px-6 text-right">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Secondary Grid: Details & Logs -->
+<div class="grid grid-cols-12 gap-12 mb-20">
+<div class="col-span-12 md:col-span-7">
+<div class="bg-white border border-black p-1">
+<div class="border border-dashed border-black/20 p-8">
+<h4 class="font-mono text-[10px] uppercase tracking-widest mb-6 font-normal">Visual_Overview_System_Architecture</h4>
+<div class="aspect-video bg-neutral-100 flex items-center justify-center relative overflow-hidden">
+<img class="grayscale mix-blend-multiply opacity-20 absolute inset-0 w-full h-full object-cover" data-alt="Technical blueprint of architectural structure with thin black lines on white background minimalist clean technical look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-VMnknzGRiJXCfSyVfvLOKqWH5kpgiCqLBiSsNECB-9t9ATSYIXXhCYoCx8gA7Rm_S_H9ktQjJyolxVJYEHU-8IURPH78SU94GOqHyDQDI4ehl9DKoXC4hbfWQou24Ug8lzUcg_OMSVfrdujrPSEyAym6MpPUW0A8ibAo2MycBerfo0wukgTREM1pxRQupP2tB-HKT_iVH8NLvhLhlFijH4nCIRaCJ4uhKtu-SSo5pW8e0iGIv1qOecd7oL0oeptyx5_ofr2DBgqi"/>
+<div class="relative z-10 flex flex-col items-center gap-4">
+<div class="flex gap-1">
+<div class="w-12 h-1 bg-black"></div>
+<div class="w-12 h-1 bg-black"></div>
+<div class="w-12 h-1 bg-black/20"></div>
+</div>
+<p class="font-mono text-[10px] tracking-widest uppercase font-normal">Rendering_Data_Stream...</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-12 md:col-span-5 flex flex-col gap-8">
+<div class="border-l-4 border-black pl-8">
+<h4 class="font-mono text-[10px] uppercase tracking-widest mb-4 font-normal">Upcoming_Tasks</h4>
+<ul class="space-y-4">
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-sm mt-1" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<div>
+<p class="text-sm font-normal uppercase leading-none mb-1">Audit Q1 Quotations</p>
+<p class="font-mono text-[9px] opacity-60">DUE_BY_2024-05-15</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-sm mt-1" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<div>
+<p class="text-sm font-normal uppercase leading-none mb-1">Update Document Header Logic</p>
+<p class="font-mono text-[9px] opacity-60">DUE_BY_2024-05-18</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-sm mt-1" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<div>
+<p class="text-sm font-normal uppercase leading-none mb-1">Backup Terminal Logs</p>
+<p class="font-mono text-[9px] opacity-60">DUE_BY_2024-05-20</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="bg-black text-white p-8">
+<p class="font-mono text-[10px] uppercase tracking-widest mb-4 font-normal">Quick_Notice</p>
+<p class="text-sm italic font-light leading-relaxed">"The core value of this system lies in the precision of the input. Maintain strict adherence to document naming conventions."</p>
+<p class="font-mono text-[9px] mt-6 text-right font-normal">— SYSTEM_ADMIN</p>
+</div>
+</div>
+</div>
+<!-- Footer Meta -->
+<footer class="border-t border-black/10 pt-8 pb-20 flex justify-between">
+<div class="flex gap-12">
+<div>
+<p class="font-mono text-[10px] uppercase tracking-widest opacity-40 mb-2">Build_ID</p>
+<p class="font-mono text-[10px] uppercase tracking-widest font-normal">A-X99.882.0</p>
+</div>
+<div>
+<p class="font-mono text-[10px] uppercase tracking-widest opacity-40 mb-2">Deployment</p>
+<p class="font-mono text-[10px] uppercase tracking-widest font-normal">Edge_Node_Alpha</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-mono text-[10px] uppercase tracking-widest opacity-40 mb-2">Local_Time</p>
+<p class="font-mono text-[10px] uppercase tracking-widest font-normal">14:22:01_UTC+0</p>
+</div>
+</footer>
+</div>
+</main>
+</body></html>

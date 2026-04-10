@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface text-on-surface antialiased;
+  margin: 0;
+  font-family: theme('fontFamily.sans');
+  font-weight: 400;
+  font-feature-settings: 'rlig' 1, 'calt' 1;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 400;
+}
+
+@layer utilities {
+  .stitch-card {
+    @apply border border-black bg-surface-white;
+  }
+
+  .stitch-label {
+    @apply font-mono text-[10px] font-normal uppercase tracking-widest text-on-surface;
+  }
+
+  .stitch-input {
+    @apply w-full border border-outline-variant bg-surface-white px-3 py-2 text-sm text-on-surface placeholder:text-outline-muted focus:border-black focus:outline-none focus:ring-0;
+  }
+
+  .stitch-input--with-icon {
+    padding-left: 2.75rem !important;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Work Order</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: white;
+            color: #1a1c1c;
+            line-height: 1.4;
+        }
+
+        .document-container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm;
+            margin: 0 auto;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            table-layout: fixed;
+        }
+
+        .header-left {
+            width: 60%;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .header-right {
+            width: 40%;
+            vertical-align: top;
+            text-align: right;
+        }
+
+        .logo-wrap {
+            height: 100px;
+            width: 180px;
+            margin-bottom: 0px;
+        }
+
+        .logo-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .logo-fallback {
+            height: 64px;
+            width: 64px;
+            background: black;
+            color: white;
+            text-align: center;
+            line-height: 64px;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .company-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            line-height: 1.25;
+            font-weight: 300;
+        }
+
+        .doc-title {
+            font-size: 48px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin-bottom: 8px;
+            line-height: 0.9;
+        }
+
+        .meta-group {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .meta-label {
+            opacity: 0.4;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 60px;
+            table-layout: fixed;
+        }
+
+        .info-col {
+            width: 50%;
+            vertical-align: top;
+            padding-right: 20px;
+        }
+
+        .section-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid black;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .headline {
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .address-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            font-weight: 300;
+            line-height: 1.45;
+        }
+
+        .content-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+
+        .prose {
+            font-size: 11px;
+            text-transform: uppercase;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-bottom: 40px;
+        }
+
+        .items-table th {
+            padding: 12px 0;
+            border-bottom: 1px solid black;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+        }
+
+        .items-table td {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f3f4;
+            vertical-align: top;
+        }
+
+        .desc-text {
+            font-size: 10px;
+            text-transform: uppercase;
+            line-height: 1.4;
+            padding-right: 20px;
+        }
+
+        .num-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-align: right;
+            font-weight: 300;
+        }
+
+        .totals-section {
+            margin-top: 24px;
+            border-top: 1px solid black;
+            padding-top: 16px;
+            page-break-inside: avoid;
+        }
+
+        .totals-table {
+            width: 280px;
+            border-collapse: collapse;
+            float: right;
+        }
+
+        .totals-table td {
+            border: none;
+            padding: 4px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .total-lbl {
+            text-align: right;
+            opacity: 0.6;
+            padding-right: 40px;
+        }
+
+        .total-val {
+            text-align: right;
+        }
+
+        .grand-total-row td {
+            font-size: 20px;
+            font-weight: 700;
+            padding-top: 16px;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 32px;
+            border-top: 1px solid #f3f3f4;
+            width: 100%;
+        }
+
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .footer-text {
+            width: 70%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 7px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 300;
+            line-height: 1.3;
+            vertical-align: bottom;
+        }
+
+        .footer-page {
+            width: 30%;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 7px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            vertical-align: bottom;
+        }
+
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <table class="header-table">
+            <tr>
+                <td class="header-left">
+                    <div class="logo-wrap">
+                        {% if company_logo %}
+                            <img src="{{ company_logo }}" class="logo-img">
+                        {% else %}
+                            <div class="logo-fallback">{{ (company_name or 'Q')|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="company-mono">
+                        {% if company_address %}
+                            {{ company_address.replace(',', '<br/>')|safe }}
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="header-right">
+                    <h2 class="doc-title">Work Order</h2>
+                    <div class="meta-group">
+                        <div style="font-weight: 700; margin-bottom: 4px;"><span style="opacity: 0.4; font-weight: 400;">BY,</span> {{ (company_name or '')|upper }}</div>
+                        <span class="meta-label">{% if generated_date %}DATE:{% endif %}</span> {{ (generated_date or '').replace('-', '.') }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="info-table">
+            <tr>
+                <td class="info-col">
+                    <div class="section-header">Client_Info:</div>
+                    <div class="headline">{{ client_name or '' }}</div>
+                    <div class="address-sub">
+                        {% if client_phone %}PHONE: {{ client_phone }}<br/>{% endif %}
+                        {% if client_email %}EMAIL: {{ client_email }}<br/>{% endif %}
+                        {% if service_location %}LOC: {{ service_location }}{% endif %}
+                    </div>
+                </td>
+                <td class="info-col" style="padding-right: 0;">
+                    <div class="section-header">Assigned_To:</div>
+                    <div class="headline">{{ company_name or '' }}</div>
+                    <div class="address-sub">
+                        {% if company_phone %}PH: {{ company_phone }}<br/>{% endif %}
+                        {% if start_date %}START: {{ start_date }}<br/>{% endif %}
+                        {% if end_date %}END: {{ end_date }}{% endif %}
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Rest same ... -->
+        <div class="content-section">
+            <div class="section-title-mono">WORK_DESCRIPTION</div>
+            <div class="prose">{{ work_description or '' }}</div>
+        </div>
+
+        {% if materials %}
+        <div class="content-section">
+            <div class="section-title-mono">MATERIALS_&_RESOURCES</div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60%;">Material</th>
+                        <th style="width: 10%; text-align: right;">Qty</th>
+                        <th style="width: 15%; text-align: right;">Unit_Cost</th>
+                        <th style="width: 15%; text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in materials %}
+                    <tr>
+                        <td class="desc-text">{{ m.material_name }}</td>
+                        <td class="num-cell">{{ m.quantity }} {{ m.unit }}</td>
+                        <td class="num-cell">{{ "{:,.2f}".format(m.unit_cost or 0) }}</td>
+                        <td class="num-cell">{{ "{:,.2f}".format(m.total_cost or 0) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div class="totals-section clearfix">
+            <table class="totals-table">
+                <tr>
+                    <td class="total-lbl">Labor Hours ({{ labor_hours or 0 }} @ {{ "{:,.0f}".format(labor_rate or 0) }})</td>
+                    <td class="total-val">{{ "{:,.2f}".format(labor_cost or 0) }}</td>
+                </tr>
+                <tr>
+                    <td class="total-lbl">Material Sum</td>
+                    <td class="total-val">{{ "{:,.2f}".format(material_cost or 0) }}</td>
+                </tr>
+                <tr class="grand-total-row">
+                    <td class="total-lbl" style="color: black; opacity: 1;">Total (₹)</td>
+                    <td class="total-val">{{ "{:,.2f}".format(total_cost or 0) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        {% if remarks %}
+        <div class="content-section" style="margin-top: 40px;">
+            <div class="section-title-mono">REMARKS</div>
+            <div class="prose" style="opacity: 0.6; font-size: 10px;">{{ remarks or '' }}</div>
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            <table class="footer-table">
+                <tr>
+                    <td class="footer-text">
+                        This document is a digital representation and remains valid for 30 days.
+                        Final binding execution requires cryptographic signature from both parties.
+                    </td>
+                    <td class="footer-page">
+                        Page 01 // 01
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

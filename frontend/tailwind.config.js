@@ -1,0 +1,52 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    borderRadius: {
+      none: '0',
+      sm: '0',
+      DEFAULT: '0',
+      md: '0',
+      lg: '0',
+      xl: '0',
+      '2xl': '0',
+      '3xl': '0',
+      full: '0',
+    },
+    extend: {
+      colors: {
+        primary: {
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#525252',
+          600: '#000000',
+          700: '#000000',
+          800: '#000000',
+          900: '#000000',
+        },
+        surface: '#f9f9f9',
+        'on-surface': '#1a1c1c',
+        'outline-muted': '#777777',
+        'outline-variant': '#c6c6c6',
+        'surface-container': '#eeeeee',
+        'surface-white': '#ffffff',
+        success: '#1a1a1a',
+        warning: '#525252',
+        error: '#ba1a1a',
+        background: '#f9f9f9',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
+        headline: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        label: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: { none: 'none' },
+    },
+  },
+  plugins: [],
+};

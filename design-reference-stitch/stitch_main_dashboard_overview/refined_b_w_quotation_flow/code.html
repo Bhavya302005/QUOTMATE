@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QUO_DOC | Quotation Workspace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@300;400;500&amp;family=Space+Grotesk:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#5e5e5e",
+              "secondary-fixed": "#c6c6c6",
+              "primary-fixed-dim": "#474747",
+              "on-tertiary-fixed-variant": "#e2e2e2",
+              "on-primary-fixed": "#ffffff",
+              "primary-container": "#3b3b3b",
+              "surface-container": "#eeeeee",
+              "surface-container-highest": "#e2e2e2",
+              "on-secondary-fixed": "#1b1b1b",
+              "on-primary": "#e2e2e2",
+              "on-error": "#ffffff",
+              "surface-dim": "#dadada",
+              "tertiary": "#3b3b3b",
+              "on-surface": "#1a1c1c",
+              "secondary": "#5e5e5e",
+              "background": "#f9f9f9",
+              "primary-fixed": "#5e5e5e",
+              "on-secondary-container": "#1b1b1b",
+              "surface-bright": "#f9f9f9",
+              "tertiary-fixed": "#5e5e5e",
+              "on-tertiary-fixed": "#ffffff",
+              "primary": "#000000",
+              "secondary-fixed-dim": "#ababab",
+              "surface-container-lowest": "#ffffff",
+              "outline-variant": "#c6c6c6",
+              "on-primary-container": "#ffffff",
+              "on-tertiary-container": "#ffffff",
+              "inverse-on-surface": "#f0f1f1",
+              "secondary-container": "#d4d4d4",
+              "on-background": "#1a1c1c",
+              "tertiary-container": "#747474",
+              "on-error-container": "#410002",
+              "inverse-surface": "#2f3131",
+              "on-secondary-fixed-variant": "#3b3b3b",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#474747",
+              "tertiary-fixed-dim": "#474747",
+              "surface-variant": "#e2e2e2",
+              "inverse-primary": "#c6c6c6",
+              "surface": "#f9f9f9",
+              "surface-container-high": "#e8e8e8",
+              "error": "#ba1a1a",
+              "surface-container-low": "#f3f3f4",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#e2e2e2",
+              "outline": "#777777",
+              "on-tertiary": "#e2e2e2"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"],
+              "mono": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "0px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; font-weight: 400; }
+        .sharp-border { border-radius: 0px !important; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f9f9f9; }
+        ::-webkit-scrollbar-thumb { background: #000000; }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary selection:text-white font-normal">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full border-b border-black dark:border-white z-50 bg-white dark:bg-black flex justify-between items-center w-full px-6 h-16">
+<div class="flex items-center gap-8">
+<span class="font-['JetBrains_Mono'] font-medium text-lg tracking-tighter text-black dark:text-white">QUO_DOC</span>
+<nav class="hidden md:flex gap-6 items-center h-full">
+<a class="text-gray-500 dark:text-gray-400 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors duration-100 px-2 py-1" href="#">Drafts</a>
+<a class="text-gray-500 dark:text-gray-400 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors duration-100 px-2 py-1" href="#">Archive</a>
+<a class="text-gray-500 dark:text-gray-400 font-normal font-['Inter'] text-sm hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors duration-100 px-2 py-1" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="p-2 hover:bg-black hover:text-white transition-colors"><span class="material-symbols-outlined" data-icon="history">history</span></button>
+<button class="p-2 hover:bg-black hover:text-white transition-colors"><span class="material-symbols-outlined" data-icon="print">print</span></button>
+</div>
+<button class="bg-primary text-white px-4 py-2 text-sm font-medium sharp-border hover:bg-gray-800 transition-colors">New Document</button>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 border-r border-black dark:border-white bg-neutral-50 dark:bg-neutral-900 hidden lg:flex flex-col py-8 overflow-y-auto">
+<div class="px-6 mb-10">
+<h2 class="font-['Inter'] font-semibold text-xl uppercase tracking-tighter">OPERATOR_01</h2>
+<p class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest opacity-60 font-light">V.2.4.0_STABLE</p>
+</div>
+<nav class="flex-grow">
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span> Dashboard
+        </a>
+<a class="bg-black text-white dark:bg-white dark:text-black font-medium px-4 py-3 flex items-center gap-3 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined" data-icon="format_quote">format_quote</span> Quotations
+        </a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span> Documents
+        </a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span> Templates
+        </a>
+<a class="text-black dark:text-white px-4 py-3 flex items-center gap-3 opacity-60 font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest hover:bg-neutral-200 dark:hover:bg-neutral-800" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span> System_Logs
+        </a>
+</nav>
+<div class="mt-auto px-4 space-y-2">
+<button class="w-full bg-outline py-2 text-[10px] font-mono font-medium uppercase tracking-widest text-white hover:bg-primary transition-colors">Quick_Action</button>
+<div class="pt-4 border-t border-black/10 flex flex-col gap-1">
+<a class="flex items-center gap-2 px-2 py-1 opacity-60 hover:opacity-100 text-[10px] font-mono font-medium uppercase" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help_outline">help_outline</span> Support
+            </a>
+<a class="flex items-center gap-2 px-2 py-1 opacity-60 hover:opacity-100 text-[10px] font-mono font-medium uppercase" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="code">code</span> Terminal
+            </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 mt-16 min-h-[calc(100vh-64px)] flex flex-col md:flex-row">
+<!-- Left Pane: Form & OCR -->
+<section class="w-full md:w-1/2 p-8 lg:p-12 bg-white border-r border-black overflow-y-auto max-h-[calc(100vh-64px)]">
+<div class="max-w-xl mx-auto space-y-12">
+<header class="space-y-2">
+<p class="font-mono text-[10px] tracking-widest text-outline uppercase font-light">Module / Creator_v1</p>
+<h1 class="font-headline font-bold text-4xl tracking-tighter uppercase">Generate Quotation</h1>
+</header>
+<!-- OCR Dropzone -->
+<div class="border border-black border-dashed p-10 flex flex-col items-center justify-center space-y-4 hover:bg-neutral-50 cursor-pointer group transition-colors">
+<span class="material-symbols-outlined text-4xl" data-icon="document_scanner">document_scanner</span>
+<span class="font-mono text-xs font-medium tracking-widest uppercase text-center">DROP_MANIFEST_TO_SCAN</span>
+<p class="text-[10px] opacity-60 text-center font-label font-light">SUPPORTED: PDF, PNG, JPG (MAX 10MB)</p>
+</div>
+<!-- Manual Input Form -->
+<form class="space-y-8">
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-1">
+<label class="font-mono text-[10px] uppercase tracking-widest text-outline font-medium">REF_ID</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-black focus:ring-0 px-0 py-2 font-mono text-sm font-normal" type="text" value="QT-2024-001"/>
+</div>
+<div class="space-y-1">
+<label class="font-mono text-[10px] uppercase tracking-widest text-outline font-medium">DATE_STAMP</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-black focus:ring-0 px-0 py-2 font-mono text-sm font-normal" type="text" value="2024.05.22"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-mono text-[10px] uppercase tracking-widest text-outline font-medium">CLIENT_NAME</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-black focus:ring-0 px-0 py-2 font-headline text-lg font-medium" placeholder="Enter full legal entity name" type="text"/>
+</div>
+<div class="space-y-4 pt-4">
+<h3 class="font-mono text-[10px] uppercase tracking-widest font-medium">Line_Items</h3>
+<div class="space-y-4">
+<div class="flex gap-4 items-end group">
+<div class="flex-grow space-y-1">
+<label class="font-mono text-[10px] uppercase opacity-40 font-light">Description</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-black focus:ring-0 px-0 py-2 text-sm font-normal" type="text" value="Architectural Design Consultation"/>
+</div>
+<div class="w-24 space-y-1">
+<label class="font-mono text-[10px] uppercase opacity-40 font-light">Qty</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-black focus:ring-0 px-0 py-2 font-mono text-sm font-normal" type="number" value="1"/>
+</div>
+<div class="w-32 space-y-1">
+<label class="font-mono text-[10px] uppercase opacity-40 font-light">Price</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-black focus:ring-0 px-0 py-2 font-mono text-sm font-normal" type="text" value="2500.00"/>
+</div>
+<button class="p-2 opacity-0 group-hover:opacity-100"><span class="material-symbols-outlined text-sm" data-icon="close">close</span></button>
+</div>
+</div>
+<button class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest font-medium border-b border-black pb-1 hover:bg-black hover:text-white transition-all">
+<span class="material-symbols-outlined text-xs" data-icon="add">add</span> Add_Line_Entry
+                    </button>
+</div>
+<div class="pt-8 flex justify-end gap-4">
+<button class="px-8 py-3 border border-black font-mono text-[10px] uppercase tracking-widest font-medium hover:bg-neutral-100 transition-colors">Save_Draft</button>
+<button class="px-8 py-3 bg-black text-white font-mono text-[10px] uppercase tracking-widest font-medium hover:bg-neutral-800 transition-colors">Finalize_Quo</button>
+</div>
+</form>
+</div>
+</section>
+<!-- Right Pane: Live Document Preview -->
+<section class="w-full md:w-1/2 p-12 bg-neutral-900 overflow-y-auto max-h-[calc(100vh-64px)] flex flex-col items-center">
+<div class="w-full max-w-[595px] mb-4 flex justify-between items-end">
+<span class="font-mono text-[10px] text-white/40 tracking-[0.2em] uppercase font-light">LIVE_DOCUMENT_PREVIEW</span>
+<div class="flex gap-2">
+<div class="h-2 w-2 bg-white rounded-full animate-pulse"></div>
+<span class="font-mono text-[8px] text-white/60 font-light">SYNCING_DATA_RECON</span>
+</div>
+</div>
+<!-- The "Sheet" -->
+<div class="w-full max-w-[595px] aspect-[1/1.414] bg-white shadow-2xl p-12 flex flex-col font-['Inter'] relative">
+<!-- Branding Header -->
+<div class="flex justify-between items-start mb-16">
+<div class="space-y-4">
+<div class="h-12 w-12 bg-black flex items-center justify-center">
+<span class="text-white font-bold text-xl">Q</span>
+</div>
+<div class="font-mono text-[10px] leading-tight uppercase font-light">
+                        QUO_DOC SYSTEMS INC.<br/>
+                        100 ARCHITECTURAL PLAZA<br/>
+                        NY 10001, UNITED STATES
+                    </div>
+</div>
+<div class="text-right">
+<h2 class="font-headline font-bold text-3xl uppercase tracking-tighter mb-2">Quotation</h2>
+<div class="font-mono text-[10px] leading-relaxed uppercase font-light">
+<span class="opacity-40">NO:</span> QT-2024-001<br/>
+<span class="opacity-40">DATE:</span> 2024.05.22<br/>
+<span class="opacity-40">STATUS:</span> DRAFT_ALPHA
+                    </div>
+</div>
+</div>
+<!-- Client Info -->
+<div class="grid grid-cols-2 gap-12 mb-16">
+<div class="space-y-2">
+<span class="font-mono text-[8px] uppercase tracking-widest border-b border-black block pb-1 font-medium">Bill_To:</span>
+<div class="font-headline font-semibold text-sm uppercase">[CLIENT_NAME_PLACEHOLDER]</div>
+<div class="font-mono text-[9px] opacity-60 uppercase font-light">ENTITY_ADDRESS_DATA<br/>TAX_ID: pending</div>
+</div>
+<div class="space-y-2">
+<span class="font-mono text-[8px] uppercase tracking-widest border-b border-black block pb-1 font-medium">Issued_By:</span>
+<div class="font-headline font-semibold text-sm uppercase">OPERATOR_01</div>
+<div class="font-mono text-[9px] opacity-60 uppercase font-light">SYSTEM_GEN_CERTIFIED<br/>AUTH_KEY: 8x-f2-99-k1</div>
+</div>
+</div>
+<!-- Line Items Table -->
+<div class="flex-grow">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-black">
+<th class="py-2 font-mono text-[9px] uppercase tracking-widest font-medium">Description</th>
+<th class="py-2 font-mono text-[9px] uppercase tracking-widest text-right font-medium">Qty</th>
+<th class="py-2 font-mono text-[9px] uppercase tracking-widest text-right font-medium">Unit_Price</th>
+<th class="py-2 font-mono text-[9px] uppercase tracking-widest text-right font-medium">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-neutral-200">
+<tr>
+<td class="py-4 text-xs font-normal uppercase">Architectural Design Consultation</td>
+<td class="py-4 font-mono text-xs text-right font-light">1.00</td>
+<td class="py-4 font-mono text-xs text-right font-light">2,500.00</td>
+<td class="py-4 font-mono text-xs text-right font-light">2,500.00</td>
+</tr>
+<tr class="opacity-20 italic">
+<td class="py-4 text-xs font-normal uppercase">[ADDITIONAL_ENTRY]</td>
+<td class="py-4 font-mono text-xs text-right font-light">--</td>
+<td class="py-4 font-mono text-xs text-right font-light">--</td>
+<td class="py-4 font-mono text-xs text-right font-light">0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Totals -->
+<div class="mt-8 border-t border-black pt-4">
+<div class="flex justify-end gap-12">
+<div class="space-y-1">
+<div class="font-mono text-[10px] text-right uppercase opacity-60 font-light">Subtotal</div>
+<div class="font-mono text-[10px] text-right uppercase opacity-60 font-light">Tax (0.0%)</div>
+<div class="font-mono text-lg font-bold text-right uppercase pt-2">Total USD</div>
+</div>
+<div class="space-y-1">
+<div class="font-mono text-[10px] text-right font-light">2,500.00</div>
+<div class="font-mono text-[10px] text-right font-light">0.00</div>
+<div class="font-mono text-lg font-bold text-right pt-2">2,500.00</div>
+</div>
+</div>
+</div>
+<!-- Footer Fine Print -->
+<div class="mt-16 pt-8 border-t border-neutral-100">
+<p class="font-mono text-[7px] leading-tight text-neutral-400 uppercase font-light">
+                    This document is a digital representation and remains valid for 30 days from DATE_STAMP. 
+                    Final binding execution requires cryptographic signature from both parties.
+                    System generated via QUO_DOC_CORE v.2.4.0.
+                </p>
+</div>
+<!-- Watermark -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden opacity-[0.03]">
+<span class="font-headline font-bold text-[120px] rotate-[-45deg] whitespace-nowrap">QUO_DOC_DRAFT</span>
+</div>
+</div>
+<!-- Contextual Controls -->
+<div class="mt-8 flex gap-4">
+<button class="bg-white/10 text-white px-6 py-2 font-mono text-[10px] uppercase tracking-widest font-medium hover:bg-white/20 transition-colors">Export_PDF</button>
+<button class="bg-white/10 text-white px-6 py-2 font-mono text-[10px] uppercase tracking-widest font-medium hover:bg-white/20 transition-colors">Direct_Mail</button>
+<button class="bg-white/10 text-white px-6 py-2 font-mono text-[10px] uppercase tracking-widest font-medium hover:bg-white/20 transition-colors">View_Source</button>
+</div>
+</section>
+</main>
+<!-- Floating Tooltip Mockup -->
+<div class="fixed bottom-8 right-8 bg-black text-white p-4 font-mono text-[10px] tracking-widest uppercase hidden lg:block border border-white/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-green-500" data-icon="terminal">terminal</span>
+<span class="font-light">SYSTEM_READY: SYNC_0.02ms</span>
+</div>
+</div>
+</body></html>
