@@ -1,0 +1,39 @@
+[project]
+name = "quotmate-backend"
+version = "1.0.0"
+description = "Smart Business Document Generator API"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi==0.128.8",
+    "uvicorn==0.34.3",
+    "sqlalchemy==2.0.46",
+    "pymysql==1.1.2",
+    "python-dotenv==1.0.0",
+    "pydantic==2.10.6",
+    "pydantic-settings==2.11.0",
+    "PyJWT[crypto]==2.10.1",
+    "bcrypt==5.0.0",
+    "email-validator==2.3.0",
+    "python-multipart==0.0.20",
+    "numpy==1.26.4",
+    "opencv-python-headless==4.10.0.84",
+    "Pillow==10.4.0",
+    "weasyprint==62.3",
+    "reportlab==4.4.4",
+    "Jinja2==3.1.6",
+    "requests==2.32.3",
+    "alembic==1.13.3",
+    "aiofiles==25.1.0",
+    "pytesseract==0.3.13",
+    "httpx==0.28.1",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-rsxX -l --tb=short --strict-markers"
+xfail_strict = true
