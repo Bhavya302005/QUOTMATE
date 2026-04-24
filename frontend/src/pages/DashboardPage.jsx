@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, TrendingUp, FileText, ClipboardList } from 'lucide-react';
+import { Trash2, TrendingUp, FileText, ClipboardList, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
 import { dashboardAPI, documentsAPI } from '../services/api.js';
@@ -109,20 +109,20 @@ export default function DashboardPage() {
         </div>
         <div className="border-t border-black pt-6 md:col-span-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
           <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-outline-muted">Architectural summary</p>
-          <p className="text-sm font-light leading-relaxed text-on-surface">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-on-surface">
             {stats.total_documents ?? 0} documents on file.
             {qStatus.finalized ? ` ${qStatus.finalized} quotations finalized.` : ''}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-px border border-black bg-black md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-px border border-black bg-black md:grid-cols-4">
         <div className="group bg-surface-white p-6 transition-colors duration-200 hover:bg-black hover:text-white md:p-8">
           <p className="mb-8 flex justify-between font-mono text-[10px] uppercase tracking-widest">
             Total revenue
             <TrendingUp className="h-4 w-4" strokeWidth={1.5} />
           </p>
-          <p className="text-3xl font-light leading-none tracking-tighter md:text-4xl">
+          <p className="text-3xl font-light leading-none tracking-tighter md:text-3xl lg:text-4xl">
             {fmtCurrency(stats.total_revenue)}
           </p>
           <p className="mt-2 font-mono text-[10px] uppercase tracking-widest opacity-70 group-hover:opacity-80">
@@ -134,18 +134,26 @@ export default function DashboardPage() {
             Quotations
             <FileText className="h-4 w-4" strokeWidth={1.5} />
           </p>
-          <p className="text-3xl font-light leading-none tracking-tighter md:text-4xl">{fmt(stats.total_quotations)}</p>
+          <p className="text-3xl font-light leading-none tracking-tighter md:text-3xl lg:text-4xl">{fmt(stats.total_quotations)}</p>
           <p className="mt-2 font-mono text-[10px] uppercase tracking-widest opacity-70 group-hover:opacity-80">
             {qStatus.finalized ?? 0} finalized
           </p>
         </div>
         <div className="group bg-surface-white p-6 transition-colors duration-200 hover:bg-black hover:text-white md:p-8">
           <p className="mb-8 flex justify-between font-mono text-[10px] uppercase tracking-widest">
+            MOMs
+            <Users className="h-4 w-4" strokeWidth={1.5} />
+          </p>
+          <p className="text-3xl font-light leading-none tracking-tighter md:text-3xl lg:text-4xl">{fmt(stats.total_moms)}</p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest opacity-70 group-hover:opacity-80">Meeting minutes</p>
+        </div>
+        <div className="group bg-surface-white p-6 transition-colors duration-200 hover:bg-black hover:text-white md:p-8">
+          <p className="mb-8 flex justify-between font-mono text-[10px] uppercase tracking-widest">
             Work orders
             <ClipboardList className="h-4 w-4" strokeWidth={1.5} />
           </p>
-          <p className="text-3xl font-light leading-none tracking-tighter md:text-4xl">{fmt(stats.total_work_orders)}</p>
-          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest opacity-70 group-hover:opacity-80">MOMs: {fmt(stats.total_moms)}</p>
+          <p className="text-3xl font-light leading-none tracking-tighter md:text-3xl lg:text-4xl">{fmt(stats.total_work_orders)}</p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest opacity-70 group-hover:opacity-80">Active work orders</p>
         </div>
       </div>
 
@@ -169,7 +177,7 @@ export default function DashboardPage() {
           onClick={() => navigate('/work-orders')}
           className="border border-black bg-white py-4 text-center transition-colors duration-100 hover:bg-black hover:text-white"
         >
-          <span className="block font-mono text-[10px] uppercase tracking-widest">Work orders</span>
+          <span className="block font-mono text-[10px] uppercase tracking-widest">NEW WO</span>
         </button>
       </div>
 

@@ -25,16 +25,24 @@ def _mysql_connect_args(url: str) -> dict:
 # - pool_recycle=1800: recycle connections every 30min (Railway may drop idle)
 # - pool_pre_ping=True: verify connection is alive before use
 # - echo=False: don't log SQL — saves significant I/O overhead
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args=_mysql_connect_args(settings.DATABASE_URL),
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-    pool_recycle=1800,
-    pool_timeout=15,
-    echo=False,
-)
+db_url = settings.DATABASE_URL
+if db_url.startswith("sqlite"):
+    engine_args = {
+        "connect_args": {"check_same_thread": False},
+        "echo": False
+    }
+else:
+    engine_args = {
+        "connect_args": _mysql_connect_args(db_url),
+        "pool_pre_ping": True,
+        "pool_size": 5,
+        "max_overflow": 10,
+        "pool_recycle": 1800,
+        "pool_timeout": 15,
+        "echo": False,
+    }
+
+engine = create_engine(db_url, **engine_args)
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

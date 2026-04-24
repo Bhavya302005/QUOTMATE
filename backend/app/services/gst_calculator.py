@@ -29,7 +29,7 @@ class GSTCalculator:
             is_igst: True for inter-state (IGST only), False for intra-state (CGST+SGST)
             discount_percent: Discount percentage on subtotal
             is_gst_on: If False, sets all GST calculations to 0
-            manual_total_amount: If provided, overrides the calculated grand_total
+            manual_total_amount: If provided, overrides grand_total and zeros line amounts / unit_price in the breakdown
         
         Returns:
             Complete calculation breakdown including item totals and GST breakdown
@@ -42,8 +42,7 @@ class GSTCalculator:
             qty = Decimal(str(item['quantity']))
             original_price = Decimal(str(item.get('unit_price', 0)))
             
-            # If manual total is provided, use 0 for item calculations
-            # but preserve the original unit price in the response
+            # If manual total is provided, use 0 for line math and show 0 line prices
             calc_price = Decimal('0') if manual_total_amount is not None else original_price
                 
             gst_rate = Decimal(str(item.get('gst_rate', 18)))
@@ -64,7 +63,7 @@ class GSTCalculator:
             
             calculated_items.append({
                 **item,
-                'unit_price': float(original_price),  # Preserve original unit price
+                'unit_price': 0.0 if manual_total_amount is not None else float(original_price),
                 'item_order': idx + 1,
                 'item_subtotal': float(item_subtotal),
                 'gst_amount': float(item_gst),

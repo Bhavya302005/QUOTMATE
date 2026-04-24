@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, ClipboardList, ChevronDown } from 'lucide-react';
 import { workOrderAPI } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner.jsx';
 import toast from 'react-hot-toast';
@@ -89,7 +89,7 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
   return (
     <div className="relative min-h-[80vh] space-y-6 pb-20">
       <div className="flex items-center justify-between border-b border-black pb-4">
-        <h2 className="text-2xl font-light  tracking-tighter text-on-surface md:text-3xl">Work orders</h2>
+        <h2 className="text-2xl font-light uppercase tracking-tighter text-on-surface md:text-3xl">WORK ORDERS</h2>
       </div>
 
       <div className="flex gap-2">
@@ -103,23 +103,26 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full border border-outline-variant bg-surface-white py-3 pl-10 pr-4    text-on-surface placeholder:text-outline-muted focus:border-black focus:outline-none focus:ring-0"
+            className="w-full border border-outline-variant bg-surface-white py-3 pl-10 pr-4 font-mono text-[10px] uppercase tracking-widest text-on-surface placeholder:text-outline-muted focus:border-black focus:outline-none focus:ring-0"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-          className="border border-outline-variant bg-surface-white px-3 py-3    text-on-surface focus:border-black focus:outline-none focus:ring-0"
-        >
-          <option value="">All</option>
-          <option value="pending">Pending</option>
-          <option value="in_progress">Active</option>
-          <option value="completed">Done</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="appearance-none rounded-none border border-outline-variant bg-surface-white py-3 pl-3 pr-10 font-mono text-[10px] uppercase tracking-widest text-on-surface focus:border-black focus:outline-none focus:ring-0"
+          >
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">Active</option>
+            <option value="completed">Done</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface" strokeWidth={2} />
+        </div>
       </div>
 
       {(showNewDraft || editDraftSlots.length > 0) && (
@@ -176,9 +179,11 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
         </div>
       ) : workOrders.length === 0 ? (
         <div className="mt-6 flex flex-col items-center justify-center border border-black bg-surface-white p-10 text-center">
-          <div className="mb-4 border border-black bg-black p-4 text-2xl text-white">🔧</div>
-          <h3 className="mb-1 text-base font-normal  tracking-tight text-on-surface">No work orders</h3>
-          <p className="   text-outline-muted">Create your first work order.</p>
+          <div className="mb-4 border border-black bg-black p-4 text-white">
+            <ClipboardList className="h-8 w-8" strokeWidth={1.75} />
+          </div>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-on-surface">No work orders</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-outline-muted">Create your first work order.</p>
         </div>
       ) : (
         <div className="space-y-3">

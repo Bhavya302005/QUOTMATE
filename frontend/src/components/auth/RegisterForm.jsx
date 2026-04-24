@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Building, Eye, EyeOff, Phone, Hash } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiErrorMessage } from '../../services/api';
 import Button from '../common/Button';
@@ -28,6 +28,9 @@ export default function RegisterForm() {
     try {
       await registerUser({
         full_name: data.full_name,
+        company_name: data.company_name,
+        phone: data.phone,
+        gst_number: data.gst_number,
         email: data.email,
         password: data.password,
       });
@@ -56,6 +59,41 @@ export default function RegisterForm() {
           },
         })}
       />
+
+      <Input
+        label="Company Name"
+        type="text"
+        placeholder="Enter your company name"
+        icon={Building}
+        error={errors.company_name?.message}
+        registration={register('company_name', {
+          required: 'Company Name is required',
+        })}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Input
+          label="Phone Number"
+          type="tel"
+          placeholder="Phone number"
+          icon={Phone}
+          error={errors.phone?.message}
+          registration={register('phone', {
+            required: 'Phone number is required',
+          })}
+        />
+
+        <Input
+          label="GST Number (Optional)"
+          type="text"
+          placeholder="15-char GST"
+          icon={Hash}
+          error={errors.gst_number?.message}
+          registration={register('gst_number', {
+            validate: v => !v || v.length === 15 || 'Must be exactly 15 characters',
+          })}
+        />
+      </div>
 
       <Input
         label="Email"

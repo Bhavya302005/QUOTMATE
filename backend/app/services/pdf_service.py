@@ -8,6 +8,15 @@ from typing import Dict, Optional
 import io
 from urllib.parse import urlparse
 
+# Apple Silicon Mac compatibility fix for Homebrew installed libraries
+import platform
+import os
+if platform.system() == "Darwin" and platform.machine() == "arm64":
+    # Ensure WeasyPrint's cffi can find libraries in /opt/homebrew/lib
+    fallback = os.environ.get("DYLD_FALLBACK_LIBRARY_PATH", "")
+    if "/opt/homebrew/lib" not in fallback:
+        os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = f"/opt/homebrew/lib:{fallback}".strip(":")
+
 try:
     from weasyprint import HTML, CSS
     _WEASYPRINT_AVAILABLE = True
@@ -151,11 +160,12 @@ class PDFService:
             'company_email': user_data.get('email'),
             'company_gst': user_data.get('gst_number'),
             'company_logo': self._resolve_public_asset_url(user_data.get('company_logo_url')),
+            'user_full_name': user_data.get('full_name'),
             
             # Quotation Info
             'quotation_number': quotation_data.get('document_number'),
             'quotation_status': quotation_data.get('status') or 'draft',
-            'generated_date': datetime.now().strftime('%d-%m-%Y'),
+            'generated_date': datetime.now().strftime('%Y-%m-%d'),
             'valid_until': quotation_data.get('valid_until').strftime('%d-%m-%Y') if quotation_data.get('valid_until') else None,
             
             # Customer Info
@@ -205,7 +215,10 @@ class PDFService:
         
         try:
             return self._render_html_pdf(html_content)
-        except Exception:
+        except Exception as e:
+            print(f"WeasyPrint failed to render quotation pdf: {str(e)}")
+            import traceback
+            traceback.print_exc()
             fallback_lines = [
                 f"Quotation No: {context.get('quotation_number') or '-'}",
                 f"Generated: {context.get('generated_date')}",

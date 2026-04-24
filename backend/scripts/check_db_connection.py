@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
-"""Test database connection"""
+"""Smoke-check MySQL connectivity and list tables (not run by pytest)."""
 import sys
-sys.path.insert(0, '/Users/dhrumilamin/Desktop/QuotMate/backend')
+from pathlib import Path
+
+# Project root: backend/
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.database import engine
 from app.models import Base
 
 try:
-    # Test connection
     with engine.connect() as connection:
         print("✅ Database connection successful!")
-        
-    # Create tables
+
     Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created successfully!")
-    
-    # List tables
+    print("✅ Database tables created successfully (create_all).")
+
     from sqlalchemy import inspect
+
     inspector = inspect(engine)
     tables = inspector.get_table_names()
     print(f"✅ Found {len(tables)} tables: {', '.join(tables)}")
-    
+
 except Exception as e:
     print(f"❌ Database connection failed: {e}")
     sys.exit(1)

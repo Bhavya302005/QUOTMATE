@@ -166,8 +166,6 @@ export default function QuotationPreview({
         <div className="mt-auto pt-8 border-t border-neutral-100">
           <div className="flex justify-between items-end">
             <p className="font-mono text-[7px] leading-tight text-neutral-400 uppercase font-light max-w-sm text-on-surface">
-              This document is a digital representation and remains valid for 30 days.
-              Final binding execution requires cryptographic signature from both parties.
             </p>
             <div className="font-mono text-[7px] text-neutral-400 uppercase tracking-widest text-on-surface">
               Page 01 // 01

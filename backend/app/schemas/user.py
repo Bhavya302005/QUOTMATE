@@ -9,7 +9,8 @@ class UserRegister(BaseModel):
     password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
     full_name: str = Field(..., min_length=2, max_length=100)
     company_name: Optional[str] = Field(None, max_length=100)
-    phone: Optional[str] = Field(None, max_length=15)
+    phone: str = Field(..., max_length=15)
+    gst_number: Optional[str] = Field(None, max_length=15)
     
     @validator('password')
     def validate_password(cls, v):
@@ -26,6 +27,7 @@ class UserLogin(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
+    email: Optional[EmailStr] = Field(None)
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)
     company_name: Optional[str] = Field(None, max_length=100)
     phone: Optional[str] = Field(None, max_length=15)

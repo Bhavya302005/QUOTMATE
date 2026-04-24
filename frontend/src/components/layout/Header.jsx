@@ -43,11 +43,11 @@ export default function Header() {
         <span className="font-mono text-sm font-medium tracking-tighter uppercase text-black md:hidden">QM</span>
         <div className="hidden items-center gap-2 md:flex">
           <span className="font-mono text-sm font-medium tracking-tighter uppercase text-black">QUOTMATE</span>
-          <span className="max-w-[160px] truncate font-mono text-[10px] uppercase tracking-widest text-outline-muted">
+          <span className="max-w-[160px] truncate font-mono text-sm font-medium tracking-tighter uppercase text-black">
             × {companyLabel}
           </span>
         </div>
-        <span className="max-w-[130px] truncate font-mono text-[10px] uppercase tracking-widest text-outline-muted md:hidden">
+        <span className="max-w-[130px] truncate font-mono text-sm font-medium tracking-tighter uppercase text-black md:hidden">
           × {companyLabel}
         </span>
       </div>

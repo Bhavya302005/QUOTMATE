@@ -19,6 +19,7 @@ export default function ProfilePage() {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
+      email: '',
       full_name: '',
       company_name: '',
       phone: '',
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     reset({
+      email: user.email || '',
       full_name: user.full_name || '',
       company_name: user.company_name || '',
       phone: user.phone || '',
@@ -69,7 +71,7 @@ export default function ProfilePage() {
   return (
     <div className="relative min-h-[80vh] space-y-8 pb-20">
       <div className="flex items-center justify-between border-b border-black pb-4">
-        <h1 className="text-2xl font-light  tracking-tighter text-on-surface md:text-3xl">Profile</h1>
+        <h1 className="text-2xl font-light uppercase tracking-tighter text-on-surface md:text-3xl">PROFILE</h1>
       </div>
 
       <div className="overflow-hidden border border-black bg-surface-white">
@@ -79,9 +81,9 @@ export default function ProfilePage() {
               <ShieldCheck className="h-7 w-7" strokeWidth={1.75} />
             </div>
             <div>
-              <p className="text-lg font-normal  tracking-tight text-on-surface">Account</p>
-              <p className="mt-1    text-outline-muted">
-                Business profile &amp; branding
+              <p className="font-mono text-[10px] uppercase tracking-widest text-on-surface">ACCOUNT</p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-outline-muted">
+                BUSINESS PROFILE & BRANDING
               </p>
             </div>
           </div>
@@ -147,10 +149,14 @@ export default function ProfilePage() {
                   label="Email"
                   type="email"
                   icon={Mail}
-                  disabled
-                  value={user?.email || ''}
-                  helperText="Email cannot be changed"
-                  inputClassName="cursor-not-allowed bg-surface-container text-outline-muted"
+                  error={errors.email?.message}
+                  registration={register('email', {
+                    required: 'Email is required',
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      message: 'Invalid email address',
+                    },
+                  })}
                 />
                 <Input
                   label="Company name"

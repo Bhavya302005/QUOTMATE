@@ -3,7 +3,6 @@ Image preprocessing utilities using OpenCV
 Enhances image quality for better OCR results
 """
 
-import cv2
 import numpy as np
 from PIL import Image
 from io import BytesIO
@@ -12,10 +11,20 @@ from typing import Tuple, Optional
 
 class ImagePreprocessor:
     """Preprocess images to improve OCR accuracy"""
+
+    @staticmethod
+    def _cv2():
+        """
+        Lazy import OpenCV so backend startup doesn't crash on incompatible builds.
+        """
+        import cv2
+
+        return cv2
     
     @staticmethod
     def bytes_to_cv2(image_bytes: bytes) -> np.ndarray:
         """Convert image bytes to OpenCV format"""
+        cv2 = ImagePreprocessor._cv2()
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         return img
@@ -23,6 +32,7 @@ class ImagePreprocessor:
     @staticmethod
     def cv2_to_bytes(img: np.ndarray, format: str = 'PNG', quality: int = 85) -> bytes:
         """Convert OpenCV image to bytes"""
+        cv2 = ImagePreprocessor._cv2()
         pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         img_byte_arr = BytesIO()
         if format.upper() == 'JPEG':
@@ -45,6 +55,7 @@ class ImagePreprocessor:
         Returns:
             Resized image
         """
+        cv2 = ImagePreprocessor._cv2()
         height, width = img.shape[:2]
         
         if width <= max_width and height <= max_height:
@@ -60,6 +71,7 @@ class ImagePreprocessor:
     @staticmethod
     def convert_to_grayscale(img: np.ndarray) -> np.ndarray:
         """Convert image to grayscale"""
+        cv2 = ImagePreprocessor._cv2()
         if len(img.shape) == 3:
             return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return img
@@ -76,6 +88,7 @@ class ImagePreprocessor:
         Returns:
             Blurred image
         """
+        cv2 = ImagePreprocessor._cv2()
         return cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
     
     @staticmethod
@@ -89,6 +102,7 @@ class ImagePreprocessor:
         Returns:
             Binary image
         """
+        cv2 = ImagePreprocessor._cv2()
         return cv2.adaptiveThreshold(
             img,
             255,
@@ -109,6 +123,7 @@ class ImagePreprocessor:
         Returns:
             Binary image
         """
+        cv2 = ImagePreprocessor._cv2()
         _, binary = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         return binary
     
@@ -123,6 +138,7 @@ class ImagePreprocessor:
         Returns:
             Denoised image
         """
+        cv2 = ImagePreprocessor._cv2()
         kernel = np.ones((1, 1), np.uint8)
         img = cv2.dilate(img, kernel, iterations=1)
         img = cv2.erode(img, kernel, iterations=1)
@@ -140,6 +156,7 @@ class ImagePreprocessor:
         Returns:
             Deskewed image
         """
+        cv2 = ImagePreprocessor._cv2()
         # Convert to grayscale if needed
         if len(img.shape) == 3:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -193,6 +210,7 @@ class ImagePreprocessor:
         Returns:
             Contrast-enhanced image
         """
+        cv2 = ImagePreprocessor._cv2()
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         return clahe.apply(img)
     
@@ -215,6 +233,7 @@ class ImagePreprocessor:
         Returns:
             Preprocessed image bytes
         """
+        cv2 = ImagePreprocessor._cv2()
         # Convert to OpenCV format
         img = ImagePreprocessor.bytes_to_cv2(image_bytes)
         

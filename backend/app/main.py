@@ -31,8 +31,10 @@ uploads_dir = Path(__file__).resolve().parent.parent / "uploads"
 uploads_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 
-# Database tables are now managed by Alembic migrations
+# Database tables are normally managed by Alembic migrations
 # Run: alembic upgrade head
+# But since we switched to SQLite locally, we can let SQLAlchemy create them:
+Base.metadata.create_all(bind=engine)
 
 # Root endpoint
 @app.get("/")

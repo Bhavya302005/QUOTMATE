@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, Eye, FileText, Plus, Search } from 'lucide-react';
+import { Download, Eye, Users, Plus, Search, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { momAPI, getApiErrorMessage } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -87,7 +87,7 @@ export default function MOMList() {
   return (
     <div className="relative min-h-[80vh] space-y-6 pb-20">
       <div className="flex items-center justify-between border-b border-black pb-4">
-        <h1 className="text-2xl font-light  tracking-tighter text-on-surface md:text-3xl">Meeting MOMs</h1>
+        <h1 className="text-2xl font-light uppercase tracking-tighter text-on-surface md:text-3xl">MINUTES OF MEETING</h1>
       </div>
 
       <div className="flex gap-2">
@@ -98,19 +98,22 @@ export default function MOMList() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="SEARCH MOMS..."
-            className="w-full border border-outline-variant bg-surface-white py-3 pl-10 pr-4    text-on-surface placeholder:text-outline-muted focus:border-black focus:outline-none focus:ring-0"
+            className="w-full border border-outline-variant bg-surface-white py-3 pl-10 pr-4 font-mono text-[10px] uppercase tracking-widest text-on-surface placeholder:text-outline-muted focus:border-black focus:outline-none focus:ring-0"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-outline-variant bg-surface-white px-3 py-3    text-on-surface focus:border-black focus:outline-none focus:ring-0"
-        >
-          <option value="all">All</option>
-          <option value="draft">Draft</option>
-          <option value="review">Review</option>
-          <option value="finalized">Finalized</option>
-        </select>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="appearance-none rounded-none border border-outline-variant bg-surface-white py-3 pl-3 pr-10 font-mono text-[10px] uppercase tracking-widest text-on-surface focus:border-black focus:outline-none focus:ring-0"
+          >
+            <option value="all">All</option>
+            <option value="draft">Draft</option>
+            <option value="review">Review</option>
+            <option value="finalized">Finalized</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface" strokeWidth={2} />
+        </div>
       </div>
 
       {(showNewDraft || editDraftSlots.length > 0) && (
@@ -167,10 +170,10 @@ export default function MOMList() {
       ) : filteredMoms.length === 0 ? (
         <div className="mt-6 flex flex-col items-center justify-center border border-black bg-surface-white p-10 text-center">
           <div className="mb-4 border border-black bg-black p-4 text-white">
-            <FileText className="h-8 w-8" strokeWidth={1.75} />
+            <Users className="h-8 w-8" strokeWidth={1.75} />
           </div>
-          <h3 className="mb-1 text-base font-normal  tracking-tight text-on-surface">No MOMs</h3>
-          <p className="   text-outline-muted">Create your first MOM.</p>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-on-surface">No MOMs</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-outline-muted">Create your first MOM.</p>
         </div>
       ) : (
         <div className="mt-6 space-y-3">

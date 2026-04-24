@@ -57,6 +57,7 @@ async def register(
         full_name=user_data.full_name,
         company_name=user_data.company_name,
         phone=user_data.phone,
+        gst_number=user_data.gst_number,
         is_admin=False
     )
     
@@ -164,6 +165,7 @@ async def update_profile(
     """
     # Store old values for audit log
     old_values = {
+        "email": current_user.email,
         "full_name": current_user.full_name,
         "company_name": current_user.company_name,
         "phone": current_user.phone,
@@ -175,6 +177,11 @@ async def update_profile(
     
     # Update only provided fields
     update_data = profile_data.dict(exclude_unset=True)
+    if "email" in update_data and update_data["email"] != current_user.email:
+        existing = db.query(User).filter(User.email == update_data["email"]).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already taken")
+            
     for field, value in update_data.items():
         setattr(current_user, field, value)
     
@@ -183,6 +190,7 @@ async def update_profile(
     
     # Store new values for audit log
     new_values = {
+        "email": current_user.email,
         "full_name": current_user.full_name,
         "company_name": current_user.company_name,
         "phone": current_user.phone,
