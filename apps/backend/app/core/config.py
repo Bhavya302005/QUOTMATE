@@ -2,13 +2,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import model_validator
 from typing import Optional, List
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+ENV_FILE = BACKEND_ROOT / ".env"
+
+load_dotenv(ENV_FILE)
 
 _DEFAULT_JWT_SECRET = "your-secret-key-change-in-production"
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra='ignore')
+    model_config = SettingsConfigDict(env_file=str(ENV_FILE), case_sensitive=True, extra='ignore')
     
     # Database
     DATABASE_URL: str = "mysql://root:password@localhost:3306/quotmate"
@@ -16,6 +20,16 @@ class Settings(BaseSettings):
     @model_validator(mode='after')
     def clean_database_url(self):
         if self.DATABASE_URL:
+            if self.DATABASE_URL.startswith("sqlite:///./"):
+                relative_path = self.DATABASE_URL.replace("sqlite:///./", "", 1)
+                absolute_sqlite_path = (BACKEND_ROOT / relative_path).resolve()
+                self.DATABASE_URL = f"sqlite:///{absolute_sqlite_path}"
+            elif self.DATABASE_URL.startswith("sqlite:///"):
+                sqlite_path = self.DATABASE_URL.replace("sqlite:///", "", 1)
+                if sqlite_path and not sqlite_path.startswith("/"):
+                    absolute_sqlite_path = (BACKEND_ROOT / sqlite_path).resolve()
+                    self.DATABASE_URL = f"sqlite:///{absolute_sqlite_path}"
+
             # SQLAlchemy/PyMySQL does not accept ?ssl-mode=REQUIRED in the query string
             if "?ssl-mode=" in self.DATABASE_URL:
                 self.DATABASE_URL = self.DATABASE_URL.split("?")[0]
