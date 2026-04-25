@@ -63,6 +63,33 @@ def _verify_with_legacy_fallback(user: User, input_password: str) -> bool:
     return False
 
 
+def _find_login_user(db: Session, normalized_email: str, input_password: str) -> User | None:
+    """
+    Find the correct login user among normalized-email variants.
+
+    This handles legacy rows where the same logical email may exist in multiple
+    case/whitespace forms and ensures we authenticate the matching record.
+    """
+    candidates = db.query(User).filter(
+        func.lower(func.trim(User.email)) == normalized_email
+    ).all()
+
+    if not candidates:
+        return None
+
+    # Prefer exact normalized row first for predictable behavior.
+    candidates.sort(key=lambda u: 0 if u.email == normalized_email else 1)
+
+    for user in candidates:
+        if _verify_with_legacy_fallback(user, input_password):
+            if user.email != normalized_email:
+                user.email = normalized_email
+                logger.info("login_email_normalized user_id=%s", user.id)
+            return user
+
+    return None
+
+
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserRegister,
@@ -141,29 +168,10 @@ async def login(
     """
     normalized_email = _normalize_email(credentials.email)
 
-    # Find user by email (exact normalized match first, then legacy case/space-insensitive fallback)
-    user = db.query(User).filter(User.email == normalized_email).first()
+    # Find correct user across normalized-email variants and verify password.
+    user = _find_login_user(db, normalized_email, credentials.password)
     if not user:
-        user = db.query(User).filter(
-            func.lower(func.trim(User.email)) == normalized_email
-        ).first()
-        if user and user.email != normalized_email:
-            # Self-heal legacy records so future logins hit fast exact match.
-            user.email = normalized_email
-            db.commit()
-            db.refresh(user)
-            logger.info("login_email_normalized user_id=%s", user.id)
-
-    if not user:
-        logger.warning("login_failed_user_not_found email=%s", normalized_email)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
-        )
-    
-    # Verify password with legacy compatibility fallback.
-    if not _verify_with_legacy_fallback(user, credentials.password):
-        logger.warning("login_failed_password_mismatch user_id=%s email=%s", user.id, normalized_email)
+        logger.warning("login_failed_invalid_credentials email=%s", normalized_email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
