@@ -16,7 +16,6 @@ security = HTTPBearer()
 
 # JWT Configuration
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 
 def hash_password(password: str) -> str:
@@ -48,7 +47,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+        expire = datetime.now(timezone.utc) + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
     
     to_encode.update({"exp": expire})
     encoded_jwt = pyjwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHM)

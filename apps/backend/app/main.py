@@ -1,10 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.db.session import engine, Base
 from pathlib import Path
 import os
+import logging
+from time import perf_counter
+from urllib.parse import urlparse
 
 # Import all models to ensure they're registered with Base
 from app.models import User, Document, AuditLog
@@ -17,6 +20,23 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("quotmate.api")
+
+
+def _database_runtime_summary(database_url: str) -> str:
+    """Build a sanitized DB summary for startup diagnostics."""
+    parsed = urlparse(database_url)
+    scheme = parsed.scheme or "unknown"
+
+    if scheme.startswith("sqlite"):
+        sqlite_target = parsed.path or ":memory:"
+        return f"dialect=sqlite target={sqlite_target} persistent={'no' if sqlite_target in (':memory:', '/:memory:') else 'yes'}"
+
+    host = parsed.hostname or "unknown"
+    database = parsed.path.lstrip("/") if parsed.path else "unknown"
+    return f"dialect={scheme} host={host} database={database} persistent=yes"
 
 # CORS middleware
 app.add_middleware(
@@ -35,6 +55,33 @@ else:
 
 uploads_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+
+
+@app.on_event("startup")
+async def log_startup_event() -> None:
+    logger.info("startup event: QuotMate API is starting")
+    logger.info("runtime auth_config token_expiry_hours=%s", settings.ACCESS_TOKEN_EXPIRE_HOURS)
+    logger.info("runtime db_config %s", _database_runtime_summary(settings.DATABASE_URL))
+
+
+@app.on_event("shutdown")
+async def log_shutdown_event() -> None:
+    logger.info("shutdown event: QuotMate API is stopping")
+
+
+@app.middleware("http")
+async def log_request_duration(request: Request, call_next):
+    start_time = perf_counter()
+    response = await call_next(request)
+    duration_ms = (perf_counter() - start_time) * 1000
+    logger.info(
+        "request method=%s path=%s status=%s duration_ms=%.2f",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration_ms,
+    )
+    return response
 
 # Database tables are normally managed by Alembic migrations
 # Run: alembic upgrade head

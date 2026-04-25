@@ -19,8 +19,15 @@ from app.utils.auth import (
 from app.services.audit_service import log_audit
 from app.utils.file_upload import file_upload_service
 import uuid
+import logging
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+logger = logging.getLogger("quotmate.auth")
+
+
+def _normalize_email(email: str) -> str:
+    """Normalize email input for consistent auth lookups."""
+    return email.strip().lower()
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
@@ -38,9 +45,12 @@ async def register(
     - **company_name**: Optional company name
     - **phone**: Optional phone number
     """
+    normalized_email = _normalize_email(user_data.email)
+
     # Check if email already exists
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    existing_user = db.query(User).filter(User.email == normalized_email).first()
     if existing_user:
+        logger.warning("register_failed_email_exists email=%s", normalized_email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
@@ -52,7 +62,7 @@ async def register(
     
     new_user = User(
         id=user_id,
-        email=user_data.email,
+        email=normalized_email,
         password_hash=hashed_password,
         full_name=user_data.full_name,
         company_name=user_data.company_name,
@@ -78,7 +88,7 @@ async def register(
     return RegisterResponse(
         user_id=user_id,
         message="User registered successfully",
-        email=user_data.email
+        email=normalized_email
     )
 
 
@@ -96,9 +106,12 @@ async def login(
     
     Returns JWT token valid for 24 hours
     """
+    normalized_email = _normalize_email(credentials.email)
+
     # Find user by email
-    user = db.query(User).filter(User.email == credentials.email).first()
+    user = db.query(User).filter(User.email == normalized_email).first()
     if not user:
+        logger.warning("login_failed_user_not_found email=%s", normalized_email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
@@ -106,6 +119,7 @@ async def login(
     
     # Verify password
     if not verify_password(credentials.password, user.password_hash):
+        logger.warning("login_failed_password_mismatch user_id=%s email=%s", user.id, normalized_email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
@@ -123,6 +137,7 @@ async def login(
         entity_id=user.id,
         ip_address=request.client.host if request.client else None
     )
+    logger.info("login_success user_id=%s email=%s", user.id, normalized_email)
     
     return LoginResponse(
         access_token=access_token,
@@ -178,9 +193,11 @@ async def update_profile(
     # Update only provided fields
     update_data = profile_data.dict(exclude_unset=True)
     if "email" in update_data and update_data["email"] != current_user.email:
-        existing = db.query(User).filter(User.email == update_data["email"]).first()
+        normalized_update_email = _normalize_email(update_data["email"])
+        existing = db.query(User).filter(User.email == normalized_update_email).first()
         if existing:
             raise HTTPException(status_code=400, detail="Email already taken")
+        update_data["email"] = normalized_update_email
             
     for field, value in update_data.items():
         setattr(current_user, field, value)

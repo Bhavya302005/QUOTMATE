@@ -28,7 +28,18 @@ export default function LoginForm() {
       const redirectTo = location.state?.from?.pathname || '/dashboard';
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Login failed'));
+      const statusCode = error?.response?.status;
+      const detail = error?.response?.data?.detail;
+
+      if (statusCode === 401 && typeof detail === 'string' && detail.toLowerCase().includes('incorrect email or password')) {
+        toast.error(detail);
+      } else if (statusCode === 401) {
+        toast.error('Session expired. Please login again.');
+      } else if (!error?.response) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error(getApiErrorMessage(error, 'Login failed'));
+      }
     } finally {
       setIsLoading(false);
     }
