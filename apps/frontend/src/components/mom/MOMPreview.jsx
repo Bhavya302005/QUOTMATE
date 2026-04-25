@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, FileDown, Pencil } from 'lucide-react';
 import Button from '../common/Button';
 import { useAuth } from '../../hooks/useAuth';
+import { momAPI } from '../../services/api';
 
 const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -43,9 +44,45 @@ export default function MOMPreview({
   const logoUrl = user?.company_logo_url
     ? (user.company_logo_url.startsWith('http') ? user.company_logo_url : `${VITE_API_URL}${user.company_logo_url}`)
     : null;
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl = '';
+
+    const loadPdfPreview = async () => {
+      if (!mom?.id || !showActions) {
+        setPdfPreviewUrl('');
+        return;
+      }
+      try {
+        const response = await momAPI.download(mom.id);
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        objectUrl = URL.createObjectURL(blob);
+        if (active) setPdfPreviewUrl(objectUrl);
+      } catch {
+        if (active) setPdfPreviewUrl('');
+      }
+    };
+
+    loadPdfPreview();
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [mom?.id, mom?.status, mom?.updated_at, showActions]);
 
   return (
     <div className="space-y-4">
+      {pdfPreviewUrl ? (
+        <div className="document-a4 bg-white border border-black shadow-none mx-auto w-full max-w-[210mm] min-h-[297mm] overflow-hidden">
+          <iframe
+            title="MOM PDF preview"
+            src={pdfPreviewUrl}
+            className="h-[297mm] w-full"
+          />
+        </div>
+      ) : (
       <div className="document-a4 bg-white p-12 md:p-16 flex flex-col font-['Inter'] relative selection:bg-black selection:text-white border border-black shadow-none mx-auto w-full max-w-[210mm] min-h-[297mm] overflow-hidden">
         {/* Decorative Blueprint Elements */}
         <div className="absolute top-0 right-0 w-32 h-32 border-r border-t border-black/5 -translate-y-16 translate-x-16 rotate-45 pointer-events-none"></div>
@@ -242,6 +279,7 @@ export default function MOMPreview({
           <div>Page 01 of 01</div>
         </div>
       </div>
+      )}
 
       {showActions && (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">

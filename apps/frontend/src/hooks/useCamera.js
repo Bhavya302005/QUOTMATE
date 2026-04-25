@@ -8,12 +8,26 @@ export const useCamera = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const videoRef = useRef(null);
 
-  const requestPermission = async () => {
+  const requestPermission = useCallback(async () => {
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      setError('Camera API not supported in this browser');
+      setHasPermission(false);
+      setIsStreaming(false);
+      toast.error('Camera is not supported in this browser.');
+      return false;
+    }
+
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' } }
       });
-      setStream(mediaStream);
+
+      // Stop any previous stream before replacing.
+      setStream((prev) => {
+        if (prev) prev.getTracks().forEach((track) => track.stop());
+        return mediaStream;
+      });
+
       setHasPermission(true);
       setError(null);
       setIsStreaming(true);
@@ -26,7 +40,7 @@ export const useCamera = () => {
       toast.error('Could not access camera. Please check permissions.');
       return false;
     }
-  };
+  }, []);
 
   const stopStream = useCallback(() => {
     if (stream) {
@@ -60,7 +74,9 @@ export const useCamera = () => {
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
-      videoRef.current.play().catch(e => console.error("Video play failed:", e));
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current?.play().catch((e) => console.error('Video play failed:', e));
+      };
     }
   }, [stream]);
 
