@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Download, FileDown, Pencil } from 'lucide-react';
 import Button from '../common/Button';
 import { useAuth } from '../../hooks/useAuth';
-import { workOrderAPI } from '../../services/api';
 
 const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -44,45 +43,8 @@ export default function WorkOrderPreview({
   const logoUrl = user?.company_logo_url
     ? (user.company_logo_url.startsWith('http') ? user.company_logo_url : `${VITE_API_URL}${user.company_logo_url}`)
     : null;
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState('');
-
-  useEffect(() => {
-    let active = true;
-    let objectUrl = '';
-
-    const loadPdfPreview = async () => {
-      if (!workOrder?.id || !showActions) {
-        setPdfPreviewUrl('');
-        return;
-      }
-      try {
-        const response = await workOrderAPI.download(workOrder.id);
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        objectUrl = URL.createObjectURL(blob);
-        if (active) setPdfPreviewUrl(objectUrl);
-      } catch {
-        if (active) setPdfPreviewUrl('');
-      }
-    };
-
-    loadPdfPreview();
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [workOrder?.id, workOrder?.status, workOrder?.updated_at, showActions]);
-
   return (
     <div className="space-y-4">
-      {pdfPreviewUrl ? (
-        <div className="document-a4 bg-white border border-neutral-200 shadow-sm mx-auto w-full max-w-[210mm] min-h-[297mm] overflow-hidden">
-          <iframe
-            title="Work order PDF preview"
-            src={pdfPreviewUrl}
-            className="h-[297mm] w-full"
-          />
-        </div>
-      ) : (
       <div className="document-a4 bg-white p-12 flex flex-col font-['Inter'] relative selection:bg-black selection:text-white border border-neutral-200 shadow-sm mx-auto w-full max-w-[210mm] min-h-[297mm]">
         {/* Branding Header */}
         <div className="flex justify-between items-start mb-16">
@@ -212,7 +174,6 @@ export default function WorkOrderPreview({
           </div>
         </div>
       </div>
-      )}
 
       {showActions && (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">

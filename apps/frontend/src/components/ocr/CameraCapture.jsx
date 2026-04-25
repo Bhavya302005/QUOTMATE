@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useCamera } from '../../hooks/useCamera';
 
 export default function CameraCapture({ onCapture, onClose }) {
+  const location = useLocation();
+  const lastPathRef = useRef(location.pathname);
   const { captureImage, hasPermission, isStreaming, error, requestPermission, stopStream, videoRef } = useCamera();
 
   useEffect(() => {
@@ -11,6 +14,14 @@ export default function CameraCapture({ onCapture, onClose }) {
       stopStream();
     };
   }, []);
+
+  // Safety: if user navigates to another menu while modal is open, stop camera.
+  useEffect(() => {
+    if (lastPathRef.current === location.pathname) return;
+    lastPathRef.current = location.pathname;
+    stopStream();
+    onClose?.();
+  }, [location.pathname]);
 
   const handleCapture = async () => {
     const shot = await captureImage();

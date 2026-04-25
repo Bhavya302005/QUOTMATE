@@ -8,6 +8,9 @@ export const useCamera = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const requestCounterRef = useRef(0);
+  const isRequestInFlightRef = useRef(false);
 
   const stopTracks = useCallback((mediaStream) => {
     if (!mediaStream) return;
@@ -31,34 +34,41 @@ export const useCamera = () => {
   }, [stopTracks]);
 
   const requestPermission = useCallback(async () => {
+    if (isRequestInFlightRef.current) return false;
+    isRequestInFlightRef.current = true;
+    const requestId = ++requestCounterRef.current;
+
     if (!navigator?.mediaDevices?.getUserMedia) {
       setError('Camera API not supported in this browser');
       setHasPermission(false);
       setIsStreaming(false);
       toast.error('Camera is not supported in this browser.');
+      isRequestInFlightRef.current = false;
       return false;
     }
 
-    const constraints = [
-      { video: { facingMode: { ideal: 'environment' } } },
-      { video: { facingMode: 'user' } },
-      { video: true },
-    ];
+    const primaryConstraints = {
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+    };
 
     try {
-      let mediaStream = null;
-      let lastError = null;
-      for (const constraint of constraints) {
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia(constraint);
-          break;
-        } catch (err) {
-          lastError = err;
-        }
+      let mediaStream;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia(primaryConstraints);
+      } catch {
+        // Single fallback to avoid repeated browser permission prompts.
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
       }
 
-      if (!mediaStream) {
-        throw lastError || new Error('Unable to initialize camera stream');
+      // If component got unmounted or superseded by a newer request, close stream immediately.
+      if (!isMountedRef.current || requestId !== requestCounterRef.current) {
+        stopTracks(mediaStream);
+        isRequestInFlightRef.current = false;
+        return false;
       }
 
       stopTracks(streamRef.current);
@@ -68,6 +78,7 @@ export const useCamera = () => {
       setHasPermission(true);
       setError(null);
       setIsStreaming(true);
+      isRequestInFlightRef.current = false;
       return true;
     } catch (err) {
       console.error('Camera permission denied:', err);
@@ -75,6 +86,7 @@ export const useCamera = () => {
       setHasPermission(false);
       setIsStreaming(false);
       toast.error('Could not access camera. Please check permissions.');
+      isRequestInFlightRef.current = false;
       return false;
     }
   }, []);
@@ -125,7 +137,11 @@ export const useCamera = () => {
 
   // Cleanup on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
+      requestCounterRef.current += 1;
+      isRequestInFlightRef.current = false;
       stopStream();
     };
   }, [stopStream]);

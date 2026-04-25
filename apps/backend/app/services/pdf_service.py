@@ -131,6 +131,110 @@ class PDFService:
 
         pdf.save()
         return buffer.getvalue()
+
+    def _generate_quotation_fallback_pdf(self, context: dict, items: list[dict]) -> bytes:
+        """Generate a cleaner quotation PDF when WeasyPrint is unavailable."""
+        if not _REPORTLAB_AVAILABLE:
+            raise RuntimeError(
+                "PDF renderer unavailable. Install ReportLab or system libs required by WeasyPrint."
+            )
+
+        buffer = io.BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=A4)
+        page_width, page_height = A4
+        margin = 40
+        y = page_height - margin
+
+        def new_page():
+            nonlocal y
+            pdf.showPage()
+            y = page_height - margin
+
+        # Header
+        pdf.setFont("Helvetica-Bold", 18)
+        pdf.drawString(margin, y, "Quotation")
+        y -= 24
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(margin, y, f"Quotation No: {context.get('quotation_number') or '-'}")
+        y -= 14
+        pdf.drawString(margin, y, f"Generated: {context.get('generated_date') or '-'}")
+        y -= 14
+        pdf.drawString(margin, y, f"Customer: {context.get('customer_name') or '-'}")
+        y -= 14
+        pdf.drawString(margin, y, f"Phone: {context.get('customer_phone') or '-'}")
+        y -= 14
+        pdf.drawString(margin, y, f"Email: {context.get('customer_email') or '-'}")
+        y -= 20
+
+        # Items table header
+        pdf.setFont("Helvetica-Bold", 10)
+        col_desc = margin
+        col_qty = page_width - 230
+        col_rate = page_width - 170
+        col_total = page_width - 90
+        pdf.drawString(col_desc, y, "Description")
+        pdf.drawRightString(col_qty + 30, y, "Qty")
+        pdf.drawRightString(col_rate + 30, y, "Unit Price")
+        pdf.drawRightString(col_total + 30, y, "Total")
+        y -= 8
+        pdf.line(margin, y, page_width - margin, y)
+        y -= 14
+
+        # Items
+        pdf.setFont("Helvetica", 9)
+        for item in items:
+            if y < 90:
+                new_page()
+                pdf.setFont("Helvetica-Bold", 10)
+                pdf.drawString(col_desc, y, "Description")
+                pdf.drawRightString(col_qty + 30, y, "Qty")
+                pdf.drawRightString(col_rate + 30, y, "Unit Price")
+                pdf.drawRightString(col_total + 30, y, "Total")
+                y -= 8
+                pdf.line(margin, y, page_width - margin, y)
+                y -= 14
+                pdf.setFont("Helvetica", 9)
+
+            description = str(item.get("description") or "-")
+            if len(description) > 55:
+                description = f"{description[:52]}..."
+            qty = float(item.get("quantity") or 0)
+            unit_price = float(item.get("unit_price") or 0)
+            total = float(item.get("total") or 0)
+
+            pdf.drawString(col_desc, y, description)
+            pdf.drawRightString(col_qty + 30, y, f"{qty:g}")
+            pdf.drawRightString(col_rate + 30, y, f"{unit_price:,.2f}")
+            pdf.drawRightString(col_total + 30, y, f"{total:,.2f}")
+            y -= 13
+
+        y -= 8
+        pdf.line(margin, y, page_width - margin, y)
+        y -= 16
+
+        # Totals
+        pdf.setFont("Helvetica", 10)
+        pdf.drawRightString(page_width - 120, y, "Subtotal:")
+        pdf.drawRightString(page_width - margin, y, f"{float(context.get('subtotal', 0)):,.2f}")
+        y -= 14
+        pdf.drawRightString(page_width - 120, y, "Discount:")
+        pdf.drawRightString(page_width - margin, y, f"{float(context.get('discount_amount', 0)):,.2f}")
+        y -= 14
+        pdf.drawRightString(page_width - 120, y, "CGST:")
+        pdf.drawRightString(page_width - margin, y, f"{float(context.get('cgst_amount', 0)):,.2f}")
+        y -= 14
+        pdf.drawRightString(page_width - 120, y, "SGST:")
+        pdf.drawRightString(page_width - margin, y, f"{float(context.get('sgst_amount', 0)):,.2f}")
+        y -= 14
+        pdf.drawRightString(page_width - 120, y, "IGST:")
+        pdf.drawRightString(page_width - margin, y, f"{float(context.get('igst_amount', 0)):,.2f}")
+        y -= 16
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawRightString(page_width - 120, y, "Grand Total:")
+        pdf.drawRightString(page_width - margin, y, f"{float(context.get('grand_total', 0)):,.2f}")
+
+        pdf.save()
+        return buffer.getvalue()
     
     def generate_quotation_pdf(
         self, 
@@ -219,32 +323,7 @@ class PDFService:
             print(f"WeasyPrint failed to render quotation pdf: {str(e)}")
             import traceback
             traceback.print_exc()
-            fallback_lines = [
-                f"Quotation No: {context.get('quotation_number') or '-'}",
-                f"Generated: {context.get('generated_date')}",
-                f"Customer: {context.get('customer_name') or '-'}",
-                f"Phone: {context.get('customer_phone') or '-'}",
-                f"Email: {context.get('customer_email') or '-'}",
-                "",
-                "Items:",
-            ]
-            for idx, item in enumerate(items, start=1):
-                fallback_lines.append(
-                    f"{idx}. {item.get('description', '-')}: qty {item.get('quantity', 0)} x "
-                    f"{item.get('unit_price', 0)} = {item.get('total', 0)}"
-                )
-            fallback_lines.extend(
-                [
-                    "",
-                    f"Subtotal: {context.get('subtotal', 0)}",
-                    f"Discount: {context.get('discount_amount', 0)}",
-                    f"CGST: {context.get('cgst_amount', 0)}",
-                    f"SGST: {context.get('sgst_amount', 0)}",
-                    f"IGST: {context.get('igst_amount', 0)}",
-                    f"Grand Total: {context.get('grand_total', 0)}",
-                ]
-            )
-            return self._generate_fallback_pdf("Quotation", fallback_lines)
+            return self._generate_quotation_fallback_pdf(context, items)
     
     def generate_mom_pdf(self, mom_data: Dict) -> bytes:
         """
