@@ -11,6 +11,7 @@ import {
   clearDraft,
   workOrderDraftHasContent,
 } from '../../utils/draftStorage';
+import { useAuth } from '../../context/AuthContext';
 
 function draftPhotosForStorage(photos) {
   const p = photos && typeof photos === 'object' ? photos : {};
@@ -60,6 +61,8 @@ const EMPTY_FORM = {
 };
 
 export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel, resumeDraft = false }) {
+  const { user } = useAuth();
+  const draftOwnerKey = user?.id || user?.email || 'anonymous';
   // Pre-fill from OCR data when creating a new work order via scan
   const ocrSuggested = ocrData?.suggested_work_order || null;
   const exitCleanRef = useRef(false);
@@ -84,7 +87,7 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
     const base = { ...EMPTY_FORM, ...ocrFormDefaults };
     if (workOrderId) return base;
     if (!resumeDraft) return base;
-    const d = loadDraft('workorder', 'new');
+    const d = loadDraft('workorder', 'new', draftOwnerKey);
     if (d?.form && workOrderDraftHasContent(d)) {
       return { ...base, ...d.form };
     }
@@ -93,7 +96,7 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
 
   const [materials, setMaterials] = useState(() => {
     if (workOrderId) return [];
-    const d = resumeDraft ? loadDraft('workorder', 'new') : null;
+    const d = resumeDraft ? loadDraft('workorder', 'new', draftOwnerKey) : null;
     if (d?.materials?.length) return d.materials;
     return (
       ocrSuggested?.materials?.map((m, i) => ({
@@ -107,7 +110,7 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
   const [savedId, setSavedId] = useState(workOrderId || null);
   const [photos, setPhotos] = useState(() => {
     if (workOrderId) return { before: null, after: null };
-    const d = resumeDraft ? loadDraft('workorder', 'new') : null;
+    const d = resumeDraft ? loadDraft('workorder', 'new', draftOwnerKey) : null;
     return d?.photos || { before: null, after: null };
   });
   const [signatureUrl, setSignatureUrl] = useState(() => {
@@ -119,9 +122,9 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
   const [loading, setLoading] = useState(!!workOrderId);
   const [costs, setCosts] = useState({ labor_cost: null, material_cost: null, total_cost: null });
   const [tab, setTab] = useState(() => {
-    if (workOrderId) return loadDraft('workorder', workOrderId)?.tab || 'details';
+    if (workOrderId) return loadDraft('workorder', workOrderId, draftOwnerKey)?.tab || 'details';
     if (!resumeDraft) return 'details';
-    return loadDraft('workorder', 'new')?.tab || 'details';
+    return loadDraft('workorder', 'new', draftOwnerKey)?.tab || 'details';
   });
 
   const draftSlot = workOrderId || savedId || 'new';
@@ -150,9 +153,9 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
       signatureUrl: typeof s.signatureUrl === 'string' && s.signatureUrl.startsWith('http') ? s.signatureUrl : null,
     };
     if (workOrderDraftHasContent(payload)) {
-      saveDraft('workorder', s.draftSlot, payload);
+      saveDraft('workorder', s.draftSlot, payload, draftOwnerKey);
     } else {
-      clearDraft('workorder', s.draftSlot);
+      clearDraft('workorder', s.draftSlot, draftOwnerKey);
     }
   };
 
@@ -205,7 +208,7 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
         setSignatureUrl(wo.customer_signature_url);
         setCosts({ labor_cost: wo.labor_cost, material_cost: wo.material_cost, total_cost: wo.total_cost });
 
-        const d = loadDraft('workorder', workOrderId);
+        const d = loadDraft('workorder', workOrderId, draftOwnerKey);
         if (d?.form && workOrderDraftHasContent(d)) {
           setForm((f) => ({ ...f, ...d.form }));
           if (d.materials?.length) setMaterials(d.materials);
@@ -234,13 +237,13 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
         signatureUrl: typeof signatureUrl === 'string' && signatureUrl.startsWith('http') ? signatureUrl : null,
       };
       if (workOrderDraftHasContent(payload)) {
-        saveDraft('workorder', draftSlot, payload);
+        saveDraft('workorder', draftSlot, payload, draftOwnerKey);
       } else {
-        clearDraft('workorder', draftSlot);
+        clearDraft('workorder', draftSlot, draftOwnerKey);
       }
     }, 500);
     return () => clearTimeout(t);
-  }, [form, materials, tab, savedId, photos, signatureUrl, draftSlot]);
+  }, [form, materials, tab, savedId, photos, signatureUrl, draftSlot, draftOwnerKey]);
 
   const handleChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
 
@@ -280,8 +283,8 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
         setSavedId(resp.data.id);
       }
       exitCleanRef.current = true;
-      clearDraft('workorder', savedId || 'new');
-      if (resp.data?.id) clearDraft('workorder', resp.data.id);
+      clearDraft('workorder', savedId || 'new', draftOwnerKey);
+      if (resp.data?.id) clearDraft('workorder', resp.data.id, draftOwnerKey);
       queueMicrotask(() => {
         exitCleanRef.current = false;
       });
@@ -335,7 +338,7 @@ export default function WorkOrderForm({ workOrderId, ocrData, onSaved, onCancel,
     try {
       await workOrderAPI.finalize(savedId);
       exitCleanRef.current = true;
-      clearDraft('workorder', savedId);
+      clearDraft('workorder', savedId, draftOwnerKey);
       queueMicrotask(() => {
         exitCleanRef.current = false;
       });

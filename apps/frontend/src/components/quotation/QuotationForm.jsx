@@ -51,6 +51,7 @@ function buildDefaults(source, user) {
 
 export default function QuotationForm({ initialData, ocrData, onSuccess, resumeDraft = false }) {
   const { user } = useAuth();
+  const draftOwnerKey = user?.id || user?.email || 'anonymous';
   const sourceData = useMemo(() => ocrData || initialData || EMPTY_SOURCE, [ocrData, initialData]);
   const draftSlot = initialData?.id || 'new';
   const exitCleanRef = useRef(false);
@@ -93,7 +94,7 @@ export default function QuotationForm({ initialData, ocrData, onSuccess, resumeD
     exitCleanRef.current = false;
     const base = buildDefaults(sourceData, user);
     const shouldLoadDraft = draftSlot !== 'new' || resumeDraft;
-    const stored = shouldLoadDraft ? loadDraft('quotation', draftSlot) : null;
+    const stored = shouldLoadDraft ? loadDraft('quotation', draftSlot, draftOwnerKey) : null;
     if (stored?.values && quotationDraftHasContent(stored.values)) {
       const merged = { ...base, ...stored.values };
       merged.items =
@@ -104,7 +105,7 @@ export default function QuotationForm({ initialData, ocrData, onSuccess, resumeD
     } else {
       reset(base);
     }
-  }, [draftSlot, reset, sourceData, ocrFingerprint, resumeDraft, user]);
+  }, [draftSlot, reset, sourceData, ocrFingerprint, resumeDraft, user, draftOwnerKey]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -159,13 +160,13 @@ export default function QuotationForm({ initialData, ocrData, onSuccess, resumeD
     const t = setTimeout(() => {
       const values = getValues();
       if (quotationDraftHasContent(values)) {
-        saveDraft('quotation', draftSlot, { values });
+        saveDraft('quotation', draftSlot, { values }, draftOwnerKey);
       } else {
-        clearDraft('quotation', draftSlot);
+        clearDraft('quotation', draftSlot, draftOwnerKey);
       }
     }, 500);
     return () => clearTimeout(t);
-  }, [formValues, draftSlot, getValues]);
+  }, [formValues, draftSlot, getValues, draftOwnerKey]);
 
   const flushDraft = useRef(() => {});
   flushDraft.current = () => {
@@ -173,9 +174,9 @@ export default function QuotationForm({ initialData, ocrData, onSuccess, resumeD
     const values = getValuesRef.current();
     const slot = draftSlotRef.current;
     if (isDirtyRef.current || quotationDraftHasContent(values)) {
-      saveDraft('quotation', slot, { values });
+      saveDraft('quotation', slot, { values }, draftOwnerKey);
     } else {
-      clearDraft('quotation', slot);
+      clearDraft('quotation', slot, draftOwnerKey);
     }
   };
 
@@ -236,7 +237,7 @@ export default function QuotationForm({ initialData, ocrData, onSuccess, resumeD
         : await quotationAPI.create(payload);
 
       exitCleanRef.current = true;
-      clearDraft('quotation', draftSlot);
+      clearDraft('quotation', draftSlot, draftOwnerKey);
       queueMicrotask(() => {
         exitCleanRef.current = false;
       });

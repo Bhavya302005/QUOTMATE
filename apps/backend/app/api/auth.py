@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, UploadFile, File
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import (
@@ -108,8 +109,19 @@ async def login(
     """
     normalized_email = _normalize_email(credentials.email)
 
-    # Find user by email
+    # Find user by email (exact normalized match first, then legacy case/space-insensitive fallback)
     user = db.query(User).filter(User.email == normalized_email).first()
+    if not user:
+        user = db.query(User).filter(
+            func.lower(func.trim(User.email)) == normalized_email
+        ).first()
+        if user and user.email != normalized_email:
+            # Self-heal legacy records so future logins hit fast exact match.
+            user.email = normalized_email
+            db.commit()
+            db.refresh(user)
+            logger.info("login_email_normalized user_id=%s", user.id)
+
     if not user:
         logger.warning("login_failed_user_not_found email=%s", normalized_email)
         raise HTTPException(

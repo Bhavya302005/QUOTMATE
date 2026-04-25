@@ -9,7 +9,7 @@ import Input from '../common/Input';
 import toast from 'react-hot-toast';
 
 export default function RegisterForm() {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,8 +34,9 @@ export default function RegisterForm() {
         email: data.email,
         password: data.password,
       });
-      toast.success('Registration successful. Please login.');
-      navigate('/login');
+      await login(data.email, data.password);
+      toast.success('Registration successful. Logged in to your new account.');
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Registration failed'));
     } finally {

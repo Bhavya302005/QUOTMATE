@@ -11,6 +11,7 @@ import {
   momDraftHasContent,
   clearDraft,
 } from '../../utils/draftStorage';
+import { useAuth } from '../../context/AuthContext';
 
 function formatDate(value) {
   if (!value) return '-';
@@ -28,6 +29,8 @@ function statusClass(status) {
 }
 
 export default function MOMList() {
+  const { user } = useAuth();
+  const draftOwnerKey = user?.id || user?.email || 'anonymous';
   const [moms, setMoms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -57,12 +60,12 @@ export default function MOMList() {
     return moms.filter((m) => m.status === statusFilter);
   }, [moms, statusFilter]);
 
-  const newDraft = loadDraft('mom', 'new');
+  const newDraft = loadDraft('mom', 'new', draftOwnerKey);
   const showNewDraft = newDraft?.updatedAt && momDraftHasContent(newDraft.values || {});
-  const editDraftSlots = listDraftSlots('mom').filter((s) => s.slot !== 'new');
+  const editDraftSlots = listDraftSlots('mom', draftOwnerKey).filter((s) => s.slot !== 'new');
 
   const handleDeleteLocalDraft = (slot) => {
-    clearDraft('mom', slot);
+    clearDraft('mom', slot, draftOwnerKey);
     setDraftVersion((v) => v + 1);
     toast.success('Draft removed');
   };

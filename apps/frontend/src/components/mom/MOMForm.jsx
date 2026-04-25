@@ -10,6 +10,7 @@ import {
   clearDraft,
   momDraftHasContent,
 } from '../../utils/draftStorage';
+import { useAuth } from '../../context/AuthContext';
 import Button from '../common/Button';
 import AISummary from './AISummary';
 import MOMPreview from './MOMPreview';
@@ -70,6 +71,8 @@ function buildDefaults(source, defaultMode) {
 const EMPTY_MOM = {};
 
 export default function MOMForm({ initialData, ocrData, onSuccess, defaultMode = 'manual', resumeDraft = false }) {
+  const { user } = useAuth();
+  const draftOwnerKey = user?.id || user?.email || 'anonymous';
   const sourceData = useMemo(() => ocrData || initialData || EMPTY_MOM, [initialData, ocrData]);
   const draftSlot = initialData?.id || 'new';
   const exitCleanRef = useRef(false);
@@ -110,7 +113,7 @@ export default function MOMForm({ initialData, ocrData, onSuccess, defaultMode =
     exitCleanRef.current = false;
     const base = buildDefaults(sourceData, defaultMode);
     const shouldLoadDraft = draftSlot !== 'new' || resumeDraft;
-    const stored = shouldLoadDraft ? loadDraft('mom', draftSlot) : null;
+    const stored = shouldLoadDraft ? loadDraft('mom', draftSlot, draftOwnerKey) : null;
     if (stored?.values && momDraftHasContent(stored.values)) {
       reset({ ...base, ...stored.values });
       if (stored.aiPreview) setAiPreview(stored.aiPreview);
@@ -119,19 +122,19 @@ export default function MOMForm({ initialData, ocrData, onSuccess, defaultMode =
       reset(base);
       setAiPreview(null);
     }
-  }, [draftSlot, reset, sourceData, defaultMode, ocrFingerprint, resumeDraft]);
+  }, [draftSlot, reset, sourceData, defaultMode, ocrFingerprint, resumeDraft, draftOwnerKey]);
 
   useEffect(() => {
     const t = setTimeout(() => {
       const values = getValues();
       if (momDraftHasContent(values)) {
-        saveDraft('mom', draftSlot, { values, aiPreview, defaultMode });
+        saveDraft('mom', draftSlot, { values, aiPreview, defaultMode }, draftOwnerKey);
       } else {
-        clearDraft('mom', draftSlot);
+        clearDraft('mom', draftSlot, draftOwnerKey);
       }
     }, 500);
     return () => clearTimeout(t);
-  }, [formValues, draftSlot, getValues, aiPreview, defaultMode]);
+  }, [formValues, draftSlot, getValues, aiPreview, defaultMode, draftOwnerKey]);
 
   const flushDraft = useRef(() => {});
   flushDraft.current = () => {
@@ -143,9 +146,9 @@ export default function MOMForm({ initialData, ocrData, onSuccess, defaultMode =
         values,
         aiPreview: aiPreviewRef.current,
         defaultMode: defaultModeRef.current,
-      });
+      }, draftOwnerKey);
     } else {
-      clearDraft('mom', slot);
+      clearDraft('mom', slot, draftOwnerKey);
     }
   };
 
@@ -264,7 +267,7 @@ export default function MOMForm({ initialData, ocrData, onSuccess, defaultMode =
         })();
 
       exitCleanRef.current = true;
-      clearDraft('mom', draftSlot);
+      clearDraft('mom', draftSlot, draftOwnerKey);
       queueMicrotask(() => {
         exitCleanRef.current = false;
       });

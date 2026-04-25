@@ -10,6 +10,7 @@ import {
   workOrderDraftHasContent,
   clearDraft,
 } from '../../utils/draftStorage';
+import { useAuth } from '../../context/AuthContext';
 
 const STATUS_STYLES = {
   pending: 'border-black bg-white text-on-surface',
@@ -26,6 +27,8 @@ const STATUS_LABELS = {
 };
 
 export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResumeDraft, onResumeEditDraft }) {
+  const { user } = useAuth();
+  const draftOwnerKey = user?.id || user?.email || 'anonymous';
   const [workOrders, setWorkOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -62,12 +65,12 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
     fetchWorkOrders();
   }, [fetchWorkOrders]);
 
-  const newDraft = loadDraft('workorder', 'new');
+  const newDraft = loadDraft('workorder', 'new', draftOwnerKey);
   const showNewDraft = newDraft?.updatedAt && workOrderDraftHasContent(newDraft);
-  const editDraftSlots = listDraftSlots('workorder').filter((s) => s.slot !== 'new');
+  const editDraftSlots = listDraftSlots('workorder', draftOwnerKey).filter((s) => s.slot !== 'new');
 
   const handleDeleteLocalDraft = (slot) => {
-    clearDraft('workorder', slot);
+    clearDraft('workorder', slot, draftOwnerKey);
     setDraftVersion((v) => v + 1);
     toast.success('Draft removed');
   };

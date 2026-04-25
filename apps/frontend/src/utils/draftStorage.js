@@ -5,9 +5,13 @@
 
 const PREFIX = 'quotmate_draft_v1';
 
-function storageKey(kind, slot) {
+function normalizedOwner(ownerKey) {
+  return ownerKey ? String(ownerKey) : 'anonymous';
+}
+
+function storageKey(kind, slot, ownerKey) {
   const id = slot === 'new' || !slot ? 'new' : String(slot);
-  return `${PREFIX}_${kind}_${id}`;
+  return `${PREFIX}_${kind}_${normalizedOwner(ownerKey)}_${id}`;
 }
 
 function safeParse(raw) {
@@ -19,35 +23,35 @@ function safeParse(raw) {
   }
 }
 
-export function loadDraft(kind, slot) {
-  return safeParse(localStorage.getItem(storageKey(kind, slot)));
+export function loadDraft(kind, slot, ownerKey) {
+  return safeParse(localStorage.getItem(storageKey(kind, slot, ownerKey)));
 }
 
-export function saveDraft(kind, slot, payload) {
+export function saveDraft(kind, slot, payload, ownerKey) {
   const record = {
     v: 1,
     updatedAt: Date.now(),
     ...payload,
   };
   try {
-    localStorage.setItem(storageKey(kind, slot), JSON.stringify(record));
+    localStorage.setItem(storageKey(kind, slot, ownerKey), JSON.stringify(record));
   } catch {
     // quota exceeded — ignore
   }
 }
 
-export function clearDraft(kind, slot) {
-  localStorage.removeItem(storageKey(kind, slot));
+export function clearDraft(kind, slot, ownerKey) {
+  localStorage.removeItem(storageKey(kind, slot, ownerKey));
 }
 
-export function hasDraft(kind, slot) {
-  const d = loadDraft(kind, slot);
+export function hasDraft(kind, slot, ownerKey) {
+  const d = loadDraft(kind, slot, ownerKey);
   return Boolean(d?.values || d?.form);
 }
 
 /** List all drafts for a kind: [{ slot, updatedAt, label? }] */
-export function listDraftSlots(kind) {
-  const p = `${PREFIX}_${kind}_`;
+export function listDraftSlots(kind, ownerKey) {
+  const p = `${PREFIX}_${kind}_${normalizedOwner(ownerKey)}_`;
   const out = [];
   for (let i = 0; i < localStorage.length; i += 1) {
     const k = localStorage.key(i);

@@ -11,6 +11,7 @@ import {
   quotationDraftHasContent,
   clearDraft,
 } from '../../utils/draftStorage';
+import { useAuth } from '../../context/AuthContext';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('en-IN', {
@@ -36,6 +37,8 @@ function statusClass(status) {
 }
 
 export default function QuotationList() {
+  const { user } = useAuth();
+  const draftOwnerKey = user?.id || user?.email || 'anonymous';
   const [quotations, setQuotations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -77,12 +80,12 @@ export default function QuotationList() {
     return quotations.filter((q) => q.status === statusFilter);
   }, [quotations, statusFilter]);
 
-  const newDraft = loadDraft('quotation', 'new');
+  const newDraft = loadDraft('quotation', 'new', draftOwnerKey);
   const showNewDraft = newDraft?.updatedAt && quotationDraftHasContent(newDraft.values || {});
-  const editDraftSlots = listDraftSlots('quotation').filter((s) => s.slot !== 'new');
+  const editDraftSlots = listDraftSlots('quotation', draftOwnerKey).filter((s) => s.slot !== 'new');
 
   const handleDeleteLocalDraft = (slot) => {
-    clearDraft('quotation', slot);
+    clearDraft('quotation', slot, draftOwnerKey);
     setDraftVersion((v) => v + 1);
     toast.success('Draft removed');
   };
