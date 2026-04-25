@@ -31,6 +31,38 @@ def _normalize_email(email: str) -> str:
     return email.strip().lower()
 
 
+def _verify_with_legacy_fallback(user: User, input_password: str) -> bool:
+    """
+    Verify password with backwards-compatible fallbacks.
+
+    Supports:
+    - normal bcrypt check
+    - accidental leading/trailing whitespace in user input
+    - legacy plain-text stored password hashes (auto-migrated on success)
+    """
+    candidate_passwords = [input_password]
+    stripped = input_password.strip()
+    if stripped != input_password:
+        candidate_passwords.append(stripped)
+
+    # Primary path: bcrypt hash verification
+    for candidate in candidate_passwords:
+        try:
+            if verify_password(candidate, user.password_hash):
+                return True
+        except Exception:
+            # Keep trying compatibility paths below.
+            pass
+
+    # Legacy path: stored plain-text password (self-heal to bcrypt)
+    for candidate in candidate_passwords:
+        if user.password_hash == candidate:
+            user.password_hash = hash_password(candidate)
+            return True
+
+    return False
+
+
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserRegister,
@@ -129,13 +161,17 @@ async def login(
             detail="Incorrect email or password"
         )
     
-    # Verify password
-    if not verify_password(credentials.password, user.password_hash):
+    # Verify password with legacy compatibility fallback.
+    if not _verify_with_legacy_fallback(user, credentials.password):
         logger.warning("login_failed_password_mismatch user_id=%s email=%s", user.id, normalized_email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
         )
+
+    # Persist any login-time self-healing (legacy email/password normalization).
+    db.commit()
+    db.refresh(user)
     
     # Create access token
     access_token = create_access_token(data={"sub": user.id, "email": user.email})
