@@ -7,6 +7,28 @@ export const useCamera = () => {
   const [error, setError] = useState(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+  const stopTracks = useCallback((mediaStream) => {
+    if (!mediaStream) return;
+    mediaStream.getTracks().forEach((track) => {
+      try {
+        track.stop();
+      } catch {
+        // ignore
+      }
+    });
+  }, []);
+
+  const stopStream = useCallback(() => {
+    stopTracks(streamRef.current);
+    streamRef.current = null;
+    setStream(null);
+    setIsStreaming(false);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, [stopTracks]);
 
   const requestPermission = useCallback(async () => {
     if (!navigator?.mediaDevices?.getUserMedia) {
@@ -17,16 +39,31 @@ export const useCamera = () => {
       return false;
     }
 
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } }
-      });
+    const constraints = [
+      { video: { facingMode: { ideal: 'environment' } } },
+      { video: { facingMode: 'user' } },
+      { video: true },
+    ];
 
-      // Stop any previous stream before replacing.
-      setStream((prev) => {
-        if (prev) prev.getTracks().forEach((track) => track.stop());
-        return mediaStream;
-      });
+    try {
+      let mediaStream = null;
+      let lastError = null;
+      for (const constraint of constraints) {
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia(constraint);
+          break;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      if (!mediaStream) {
+        throw lastError || new Error('Unable to initialize camera stream');
+      }
+
+      stopTracks(streamRef.current);
+      streamRef.current = mediaStream;
+      setStream(mediaStream);
 
       setHasPermission(true);
       setError(null);
@@ -42,16 +79,12 @@ export const useCamera = () => {
     }
   }, []);
 
-  const stopStream = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-      setIsStreaming(false);
-    }
-  }, [stream]);
-
   const captureImage = useCallback(() => {
     if (!videoRef.current || !isStreaming) return null;
+
+    if (!videoRef.current.videoWidth || !videoRef.current.videoHeight) {
+      return null;
+    }
 
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
@@ -79,6 +112,16 @@ export const useCamera = () => {
       };
     }
   }, [stream]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') {
+        stopStream();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [stopStream]);
 
   // Cleanup on unmount
   useEffect(() => {

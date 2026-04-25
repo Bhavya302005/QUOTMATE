@@ -3,32 +3,23 @@ import { X } from 'lucide-react';
 import { useCamera } from '../../hooks/useCamera';
 
 export default function CameraCapture({ onCapture, onClose }) {
-  const { videoRef, hasPermission, isStreaming, error, requestPermission, stopStream } = useCamera();
+  const { captureImage, hasPermission, isStreaming, error, requestPermission, stopStream, videoRef } = useCamera();
 
   useEffect(() => {
     requestPermission();
-    return () => stopStream();
-  }, [requestPermission, stopStream]);
+    return () => {
+      stopStream();
+    };
+  }, []);
 
   const handleCapture = async () => {
-    if (!videoRef.current) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.drawImage(videoRef.current, 0, 0);
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-        const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        const preview = URL.createObjectURL(blob);
-        onCapture({ file, preview });
-        stopStream();
-      },
-      'image/jpeg',
-      0.9
-    );
+    const shot = await captureImage();
+    if (!shot?.blob) return;
+
+    const file = new File([shot.blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const preview = URL.createObjectURL(shot.blob);
+    onCapture({ file, preview });
+    stopStream();
   };
 
   return (
