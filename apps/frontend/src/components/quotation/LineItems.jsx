@@ -6,10 +6,10 @@ const inputCls =
 
 const EMPTY_ITEM = {
   description: '',
-  quantity: 1,
-  unit: 'nos',
-  unit_price: 0,
-  gst_rate: 18,
+  quantity: '',
+  unit: '',
+  unit_price: '',
+  gst_rate: '',
   is_free_text: true,
   product_id: null,
 };
@@ -112,7 +112,8 @@ export default function LineItems({ control, register, errors, products = [], is
                   className={inputCls}
                 />
 
-                <select {...register(`items.${index}.unit`)} className={inputCls}>
+                <select {...register(`items.${index}.unit`, { required: 'Required' })} className={inputCls}>
+                  <option value="" disabled hidden>Unit (e.g., Nos)</option>
                   <option value="nos">Nos</option>
                   <option value="pcs">Pcs</option>
                   <option value="kg">Kg</option>
@@ -128,15 +129,19 @@ export default function LineItems({ control, register, errors, products = [], is
                     min: { value: 0, message: 'Min 0' },
                     valueAsNumber: true,
                   })}
-                  placeholder="Rate"
+                  placeholder="Rate per unit"
                   className={inputCls}
                 />
 
                 {isGstOn && (
                   <select
-                    {...register(`items.${index}.gst_rate`, { valueAsNumber: true })}
+                    {...register(`items.${index}.gst_rate`, { 
+                      required: 'Required',
+                      valueAsNumber: true 
+                    })}
                     className={inputCls}
                   >
+                    <option value="" disabled hidden>Tax %</option>
                     <option value={0}>0%</option>
                     <option value={5}>5%</option>
                     <option value={12}>12%</option>
