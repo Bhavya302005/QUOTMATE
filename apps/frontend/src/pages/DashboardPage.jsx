@@ -212,9 +212,15 @@ export default function DashboardPage() {
                     className="group cursor-pointer border-b border-outline-variant transition-colors duration-100 hover:bg-black hover:text-white"
                     role="button"
                     tabIndex={0}
-                    onClick={() => navigate(routesByType[doc.document_type] ?? '/dashboard')}
+                    onClick={() => {
+                      const base = routesByType[doc.document_type];
+                      navigate(base ? `${base}/${doc.id}` : '/dashboard');
+                    }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') navigate(routesByType[doc.document_type] ?? '/dashboard');
+                      if (e.key === 'Enter') {
+                        const base = routesByType[doc.document_type];
+                        navigate(base ? `${base}/${doc.id}` : '/dashboard');
+                      }
                     }}
                   >
                     <td className="px-4 py-4 font-mono text-[11px] uppercase tracking-widest">
