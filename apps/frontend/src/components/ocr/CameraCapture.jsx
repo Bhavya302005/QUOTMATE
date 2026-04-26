@@ -35,39 +35,42 @@ export default function CameraCapture({ onCapture, onClose }) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] md:left-64 flex flex-col bg-black text-white">
-      <div className="flex items-center justify-between border-b border-white/20 px-4 py-3">
-        <h2 className="font-mono uppercase tracking-widest">Camera</h2>
-        <button
-          type="button"
-          onClick={() => {
-            stopStream();
-            onClose();
-          }}
-          className="border border-white/30 p-2 transition-colors hover:bg-white hover:text-black"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
+    <>
+      <style>{`#bottom-tab-bar { display: none !important; }`}</style>
+      <div className="fixed inset-0 z-[60] md:left-64 flex flex-col bg-black text-white">
+        <div className="flex items-center justify-between border-b border-white/20 px-4 py-3">
+          <h2 className="font-mono uppercase tracking-widest">Camera</h2>
+          <button
+            type="button"
+            onClick={() => {
+              stopStream();
+              onClose();
+            }}
+            className="border border-white/30 p-2 transition-colors hover:bg-white hover:text-black"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-      <div className="flex-1 bg-surface-container relative">
-        <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
-      </div>
+        <div className="flex-1 bg-surface-container relative">
+          <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+        </div>
 
-      <div className="border-t border-white/20 bg-black px-6 pt-6 pb-8 md:pb-6 text-center">
-        {!hasPermission && (
-          <p className="mb-3 font-mono text-sm text-error">{error || 'Camera permission required'}</p>
-        )}
-        <button
-          type="button"
-          onClick={handleCapture}
-          disabled={!isStreaming}
-          className="mx-auto flex h-14 w-full max-w-xs items-center justify-center border-2 border-white bg-white/10 font-mono text-lg uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Capture Frame
-        </button>
+        <div className="border-t border-white/20 bg-black px-6 pt-6 pb-8 md:pb-6 text-center">
+          {!hasPermission && (
+            <p className="mb-3 font-mono text-sm text-error">{error || 'Camera permission required'}</p>
+          )}
+          <button
+            type="button"
+            onClick={handleCapture}
+            disabled={!isStreaming}
+            className="mx-auto flex h-14 w-full max-w-xs items-center justify-center border-2 border-white bg-white/10 font-mono text-lg uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Capture Frame
+          </button>
+        </div>
       </div>
-    </div>,
+    </>,
     document.body
   );
 }

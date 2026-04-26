@@ -13,7 +13,7 @@ export default function BottomTabBar() {
   const location = useLocation();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-black bg-surface-white pb-[env(safe-area-inset-bottom,0)] md:hidden">
+    <div id="bottom-tab-bar" className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-black bg-surface-white pb-[env(safe-area-inset-bottom,0)] md:hidden">
       <nav className="mx-auto flex h-14 w-full max-w-lg items-stretch justify-between">
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
