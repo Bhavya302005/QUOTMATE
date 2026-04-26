@@ -367,6 +367,7 @@ class PDFService:
             "company_name": mom_data.get('company_name'),
             "company_email": mom_data.get('company_email'),
             "company_phone": mom_data.get('company_phone'),
+            "user_data": mom_data.get('user_data', {}),
         }
 
         html_content = template.render(**context)

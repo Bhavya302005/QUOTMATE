@@ -316,14 +316,16 @@
                     <div class="address-sub">
                         {% if customer_address %}{{ customer_address.replace(',', '<br/>')|safe }}<br/>{% endif %}
                         {% if customer_gst %}TAX_ID: {{ customer_gst }}<br/>{% endif %}
-                        {% if customer_phone %}PHONE: {{ customer_phone }}{% endif %}
+                        {% if customer_phone %}PHONE: {{ customer_phone }}<br/>{% endif %}
+                        {% if customer_email %}EMAIL: {{ customer_email }}{% endif %}
                     </div>
                 </td>
                 <td class="info-col" style="padding-right: 0;">
                     <div class="section-header">Issued_By:</div>
                     <div class="headline">{{ user_full_name or '' }}</div>
                     <div class="address-sub">
-                        {% if company_phone %}PH: {{ company_phone }}{% endif %}
+                        {% if company_phone %}PH: {{ company_phone }}<br/>{% endif %}
+                        {% if company_email %}EMAIL: {{ company_email }}{% endif %}
                     </div>
                 </td>
             </tr>

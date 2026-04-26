@@ -92,7 +92,8 @@ export default function WorkOrderPreview({
             <span className="font-mono text-[8px] uppercase tracking-widest border-b border-black block pb-1 font-medium text-on-surface">Assigned_To:</span>
             <div className="font-headline font-semibold text-base uppercase text-on-surface">{workOrder.assigned_to || user?.full_name || ''}</div>
             <div className="font-mono text-[9px] opacity-60 uppercase font-light leading-relaxed text-on-surface pt-1">
-                {user?.phone && `PH: ${user.phone}`}
+                {user?.phone && <>{`PH: ${user.phone}`}<br /></>}
+                {user?.email && `EMAIL: ${user.email}`}
             </div>
             <div className="font-mono text-[9px] opacity-60 uppercase font-light leading-relaxed text-on-surface">
               {workOrder.start_date && <p>START: {workOrder.start_date}</p>}

@@ -322,7 +322,11 @@
                     <div class="border-l-black">
                         <div class="label-mono">Chairperson</div>
                         <div class="val-bold">{{ user_data.full_name|upper or '—' }}</div>
-                        {% if user_data.phone %}<div class="label-mono" style="margin-top:2px;">PH: {{ user_data.phone }}</div>{% endif %}
+                        <div class="label-mono" style="margin-top:2px;">
+                            {% if user_data.phone %}PH: {{ user_data.phone }}{% endif %}
+                            {% if user_data.phone and company_email %} | {% endif %}
+                            {% if company_email %}EMAIL: {{ company_email }}{% endif %}
+                        </div>
                     </div>
                     <div class="border-l-black" style="margin-bottom: 0;">
                         <div class="label-mono">Location</div>
@@ -422,7 +426,11 @@
                 <div class="approval-left">
                     <div class="sig-line">
                         {{ user_data.full_name|upper }} 
-                        {% if user_data.phone %}<span style="font-size: 8px; opacity: 0.4; font-weight: 400; margin-left: 10px;">PH: {{ user_data.phone }}</span>{% endif %}
+                        <span style="font-size: 8px; opacity: 0.4; font-weight: 400; margin-left: 10px;">
+                            {% if user_data.phone %}PH: {{ user_data.phone }}{% endif %}
+                            {% if user_data.phone and company_email %} | {% endif %}
+                            {% if company_email %}EMAIL: {{ company_email }}{% endif %}
+                        </span>
                     </div>
                     <div class="label-mono">Meeting Chairperson / Issued By</div>
                     

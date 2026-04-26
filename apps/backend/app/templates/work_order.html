@@ -320,6 +320,7 @@
                     <div class="headline">{{ company_name or '' }}</div>
                     <div class="address-sub">
                         {% if company_phone %}PH: {{ company_phone }}<br/>{% endif %}
+                        {% if company_email %}EMAIL: {{ company_email }}<br/>{% endif %}
                         {% if start_date %}START: {{ start_date }}<br/>{% endif %}
                         {% if end_date %}END: {{ end_date }}{% endif %}
                     </div>

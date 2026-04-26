@@ -104,7 +104,13 @@ export default function MOMPreview({
             <div className="border-l border-black pl-4">
               <label className="font-mono text-[10px] uppercase text-neutral-400 block mb-1 font-light">Chairperson</label>
               <span className="font-semibold text-sm uppercase block truncate">{user?.full_name || '—'}</span>
-              {user?.phone && <span className="font-mono text-[8px] opacity-60 uppercase block mt-1">PH: {user.phone}</span>}
+              {(user?.phone || user?.email) && (
+                <span className="font-mono text-[8px] opacity-60 uppercase block mt-1">
+                  {user.phone && `PH: ${user.phone}`}
+                  {user.phone && user.email && ' | '}
+                  {user.email && `EMAIL: ${user.email}`}
+                </span>
+              )}
             </div>
             <div className="border-l border-black pl-4">
               <label className="font-mono text-[10px] uppercase text-neutral-400 block mb-1 font-light">Location</label>
@@ -222,7 +228,11 @@ export default function MOMPreview({
             <div>
               <div className="h-10 border-b border-black w-64 mb-2 flex items-end px-2 pb-1">
                 <span className="font-mono text-[10px] uppercase font-bold">{user?.full_name}</span>
-                {user?.phone && <span className="font-mono text-[8px] opacity-40 ml-2">PH: {user.phone}</span>}
+                <span className="font-mono text-[8px] opacity-40 ml-2">
+                  {user?.phone && `PH: ${user.phone}`}
+                  {user?.phone && user?.email && ' | '}
+                  {user?.email && `EMAIL: ${user.email}`}
+                </span>
               </div>
               <label className="font-mono text-[10px] uppercase text-neutral-400 font-light">Meeting Chairperson / Issued By</label>
             </div>

@@ -85,15 +85,17 @@ export default function QuotationPreview({
             <div className="font-headline font-semibold text-base uppercase text-on-surface">{quotation.customer_name || ''}</div>
             <div className="font-mono text-[9px] opacity-60 uppercase font-light leading-relaxed text-on-surface">
               {quotation.customer_address && <>{quotation.customer_address.replace(/,/g, '\n')}<br /></>}
-              {quotation.customer_gst && `TAX_ID: ${quotation.customer_gst}`}
-              {quotation.customer_phone && <><br />PHONE: {quotation.customer_phone}</>}
+              {quotation.customer_gst && <>{`TAX_ID: ${quotation.customer_gst}`}<br /></>}
+              {quotation.customer_phone && <>{`PHONE: ${quotation.customer_phone}`}<br /></>}
+              {quotation.customer_email && `EMAIL: ${quotation.customer_email}`}
             </div>
           </div>
           <div className="space-y-2">
             <span className="font-mono text-[8px] uppercase tracking-widest border-b border-black block pb-1 font-medium text-on-surface">Issued_By:</span>
             <div className="font-headline font-semibold text-base uppercase text-on-surface">{user?.full_name || ''}</div>
             <div className="font-mono text-[9px] opacity-60 uppercase font-light leading-relaxed text-on-surface pt-1">
-                {user?.phone && `PH: ${user.phone}`}
+                {user?.phone && <>{`PH: ${user.phone}`}<br /></>}
+                {user?.email && `EMAIL: ${user.email}`}
             </div>
           </div>
         </div>

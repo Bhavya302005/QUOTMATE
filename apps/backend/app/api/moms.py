@@ -106,7 +106,15 @@ def _build_mom_pdf_data(mom: MOM, document: Document, action_items: list, curren
         ],
         "company_name": current_user.company_name or current_user.full_name,
         "company_email": current_user.email,
-        "company_phone": current_user.phone
+        "company_phone": current_user.phone,
+        "user_data": {
+            "full_name": current_user.full_name,
+            "phone": current_user.phone,
+            "email": current_user.email,
+            "address": current_user.address,
+            "company_name": current_user.company_name,
+            "company_logo_url": current_user.company_logo_url
+        }
     }
 
 
