@@ -5,7 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 \
-    libffi8 shared-mime-info \
+    libffi8 shared-mime-info libpangoft2-1.0-0 libharfbuzz-dev \
+    libfontconfig1 libjpeg-dev libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -14,9 +15,6 @@ COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
 COPY . .
-
-# Ensure the script has execute permissions and run it during the Docker build
-RUN chmod +x render-build.sh && ./render-build.sh
 
 EXPOSE 8000
 
