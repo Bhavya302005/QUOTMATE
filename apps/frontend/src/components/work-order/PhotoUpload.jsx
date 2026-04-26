@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { workOrderAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://quotmate-backend.onrender.com';
 
 export default function PhotoUpload({ workOrderId, beforeUrl, afterUrl, onChange }) {
   const [uploading, setUploading] = useState(null);

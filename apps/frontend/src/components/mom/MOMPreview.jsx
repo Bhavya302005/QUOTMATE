@@ -4,7 +4,7 @@ import { Download, FileDown, Pencil } from 'lucide-react';
 import Button from '../common/Button';
 import { useAuth } from '../../hooks/useAuth';
 
-const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://quotmate-backend.onrender.com';
 
 function formatDateDot(input) {
   const d = input ? new Date(input) : new Date();

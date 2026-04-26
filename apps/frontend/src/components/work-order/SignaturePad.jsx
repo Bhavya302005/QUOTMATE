@@ -80,7 +80,7 @@ export default function SignaturePad({ workOrderId, existingUrl, onChange }) {
     }
   };
 
-  const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+  const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://quotmate-backend.onrender.com';
 
   return (
     <div className="space-y-3">
