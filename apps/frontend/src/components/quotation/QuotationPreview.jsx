@@ -68,9 +68,9 @@ export default function QuotationPreview({
                 </React.Fragment>
               ))}
             </div>
+            <h2 className="font-headline font-bold text-6xl uppercase tracking-tighter mt-8 leading-none text-on-surface">Quotation</h2>
           </div>
           <div className="text-right">
-            <h2 className="font-headline font-bold text-6xl uppercase tracking-tighter mb-4 leading-none text-on-surface">Quotation</h2>
             <div className="font-mono text-[10px] leading-relaxed uppercase font-light text-on-surface">
               <div className="font-bold mb-1"><span className="opacity-40 font-normal">BY,</span> {companyDisplayName}</div>
               <span className="opacity-40">{issueDate && 'DATE:'}</span> {issueDate}
