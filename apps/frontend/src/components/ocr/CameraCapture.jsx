@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useCamera } from '../../hooks/useCamera';
@@ -33,7 +34,7 @@ export default function CameraCapture({ onCapture, onClose }) {
     stopStream();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] md:left-64 flex flex-col bg-black text-white">
       <div className="flex items-center justify-between border-b border-white/20 px-4 py-3">
         <h2 className="font-mono uppercase tracking-widest">Camera</h2>
@@ -66,6 +67,7 @@ export default function CameraCapture({ onCapture, onClose }) {
           Capture Frame
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
