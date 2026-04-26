@@ -167,7 +167,7 @@ Return a JSON object with this EXACT structure:
             "sr_no": 1,
             "description": "EXACT description from the text",
             "quantity": null or number,
-            "unit": "sq ft, nos, pcs, sets, ltrs, etc. or null",
+            "unit": "sqft, Ton, nos, pcs, sets, ltrs, kg, box, etc. or null",
             "rate": null or number (per unit price),
             "amount": null or number (total for this line),
             "notes": "any bracket notes or sub-text for this item, or null"
@@ -256,7 +256,7 @@ Return ONLY valid JSON. No explanation text before or after."""
             # Normalize unit
             unit_lower = str(unit).lower().strip()
             unit_map = {
-                'sq ft': 'sq ft', 'sqft': 'sq ft', 'sft': 'sq ft', 'square feet': 'sq ft', 'sq feet': 'sq ft',
+                'sq ft': 'sqft', 'sqft': 'sqft', 'sft': 'sqft', 'square feet': 'sqft', 'sq feet': 'sqft',
                 'nos': 'nos', 'no': 'nos', 'no.': 'nos', 'numbers': 'nos',
                 'pcs': 'pcs', 'pc': 'pcs', 'piece': 'pcs', 'pieces': 'pcs',
                 'set': 'sets', 'sets': 'sets',
@@ -264,6 +264,8 @@ Return ONLY valid JSON. No explanation text before or after."""
                 'kg': 'kg', 'kgs': 'kg',
                 'rft': 'rft', 'running feet': 'rft',
                 'bag': 'bags', 'bags': 'bags',
+                'ton': 'Ton', 'tons': 'Ton', 'tonne': 'Ton', 'tonnes': 'Ton',
+                'box': 'box', 'boxes': 'box',
             }
             unit_normalized = unit_map.get(unit_lower, unit_lower)
             
@@ -483,7 +485,7 @@ Return a JSON object with this EXACT structure:
         {{
             "material_name": "EXACT name from text",
             "quantity": null or number,
-            "unit": "pcs, nos, kg, ltr, sets, rolls, etc. or null",
+            "unit": "pcs, nos, kg, ltr, sqft, Ton, sets, rolls, box, etc. or null",
             "unit_cost": null or number,
             "total_cost": null or number
         }}

@@ -114,9 +114,11 @@ export default function LineItems({ control, register, errors, products = [], is
 
                 <select {...register(`items.${index}.unit`, { required: 'Required' })} className={inputCls}>
                   <option value="" disabled hidden>Unit (e.g., Nos)</option>
+                  <option value="sqft">Sq.Ft</option>
                   <option value="nos">Nos</option>
                   <option value="pcs">Pcs</option>
                   <option value="kg">Kg</option>
+                  <option value="Ton">Ton</option>
                   <option value="ltr">Ltr</option>
                   <option value="box">Box</option>
                 </select>

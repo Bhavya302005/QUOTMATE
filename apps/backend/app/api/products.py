@@ -30,7 +30,7 @@ async def create_product(
     
     - **name**: Product name (required)
     - **description**: Product description
-    - **unit**: Unit of measurement (nos, kg, ltr, etc.)
+    - **unit**: Unit of measurement (nos, kg, ltr, sqft, Ton, etc.)
     - **default_price**: Default price per unit
     - **gst_rate**: GST rate percentage (default: 18%)
     """
