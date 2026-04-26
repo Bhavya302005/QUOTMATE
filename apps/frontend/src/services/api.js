@@ -25,6 +25,23 @@ export function getApiErrorMessage(error, fallback = 'Something went wrong') {
   return error?.message || fallback;
 }
 
+export function getMediaUrl(url) {
+  if (!url) return url;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  // VITE_API_URL typically points to /api, so we need to get the origin
+  try {
+    const apiOrigin = new URL(API_URL).origin;
+    return `${apiOrigin}${url.startsWith('/') ? url : '/' + url}`;
+  } catch (e) {
+    // Fallback if API_URL is relative or invalid
+    const isApiUrlRelative = !API_URL.startsWith('http');
+    const base = isApiUrlRelative ? window.location.origin : API_URL.replace(/\/api$/, '');
+    return `${base}${url.startsWith('/') ? url : '/' + url}`;
+  }
+}
+
 // Request interceptor - Add auth token
 api.interceptors.request.use(
   (config) => {

@@ -368,6 +368,7 @@ class PDFService:
             "company_email": mom_data.get('company_email'),
             "company_phone": mom_data.get('company_phone'),
             "user_data": mom_data.get('user_data', {}),
+            "company_logo": self._resolve_public_asset_url(mom_data.get('user_data', {}).get('company_logo_url')),
         }
 
         html_content = template.render(**context)
@@ -405,7 +406,13 @@ class PDFService:
         """
         # To be implemented in Week 7
         template = self.env.get_template('work_order.html')
-        html_content = template.render(**work_order_data)
+        
+        # Resolve company logo
+        user_data = work_order_data.get('user_data', {})
+        work_order_context = work_order_data.copy()
+        work_order_context['company_logo'] = self._resolve_public_asset_url(user_data.get('company_logo_url'))
+        
+        html_content = template.render(**work_order_context)
         try:
             return self._render_html_pdf(html_content)
         except Exception:

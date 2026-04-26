@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { User, Mail, Phone, Building2, MapPin, ShieldCheck, ImagePlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { getApiErrorMessage } from '../services/api';
+import { getApiErrorMessage, getMediaUrl } from '../services/api';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 
@@ -94,7 +94,7 @@ export default function ProfilePage() {
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden border border-black bg-white sm:h-28 sm:w-28">
                 {user?.company_logo_url ? (
                   <img
-                    src={user.company_logo_url}
+                    src={getMediaUrl(user.company_logo_url)}
                     alt="Company logo"
                     className="h-full w-full object-contain p-2"
                     width="128"

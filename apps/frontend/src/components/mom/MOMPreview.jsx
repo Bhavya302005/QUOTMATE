@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Download, FileDown, Pencil } from 'lucide-react';
 import Button from '../common/Button';
 import { useAuth } from '../../hooks/useAuth';
+import { getMediaUrl } from '../../services/api';
 
-const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://quotmate-backend.onrender.com';
 
 function formatDateDot(input) {
   const d = input ? new Date(input) : new Date();
@@ -40,9 +40,7 @@ export default function MOMPreview({
   const issueDate = formatDateDot(mom.created_at || mom.meeting_date);
 
   // Logo Resolution
-  const logoUrl = user?.company_logo_url
-    ? (user.company_logo_url.startsWith('http') ? user.company_logo_url : `${VITE_API_URL}${user.company_logo_url}`)
-    : null;
+  const logoUrl = getMediaUrl(user?.company_logo_url);
   return (
     <div className="space-y-4">
       <div className="w-full overflow-x-auto overflow-y-hidden max-w-full pb-4">

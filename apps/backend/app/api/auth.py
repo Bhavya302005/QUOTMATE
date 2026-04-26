@@ -308,10 +308,8 @@ async def upload_company_logo(
         )
 
     _, file_url = await file_upload_service.save_upload_file(file, "images")
-    absolute_logo_url = f"{str(request.base_url).rstrip('/')}{file_url}"
-
     old_logo_url = current_user.company_logo_url
-    current_user.company_logo_url = absolute_logo_url
+    current_user.company_logo_url = file_url
 
     db.commit()
     db.refresh(current_user)
@@ -323,7 +321,7 @@ async def upload_company_logo(
         entity_type="user",
         entity_id=current_user.id,
         old_value={"company_logo_url": old_logo_url},
-        new_value={"company_logo_url": absolute_logo_url},
+        new_value={"company_logo_url": file_url},
         ip_address=request.client.host if request.client else None
     )
 
