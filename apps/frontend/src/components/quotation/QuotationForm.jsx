@@ -29,7 +29,7 @@ const EMPTY_SOURCE = {};
 function buildDefaults(source, user) {
   const items = Array.isArray(source?.items) && source.items.length > 0
     ? source.items.map(normalizeItem)
-    : [{ description: '', quantity: 1, unit: 'nos', unit_price: 0, gst_rate: 18, is_free_text: true, product_id: null }];
+    : [{ description: '', quantity: '', unit: '', unit_price: '', gst_rate: '', is_free_text: true, product_id: null }];
 
   return {
     document_id: source?.document_id || '',
@@ -310,15 +310,21 @@ export default function QuotationForm({ initialData, ocrData, onSuccess, resumeD
             />
           </div>
 
-          <label className="flex items-center gap-2 border border-outline-variant bg-surface-white px-3 py-2.5    text-on-surface">
-            <input type="checkbox" {...register('is_igst')} disabled={!watchedIsGstOn} />
-            Use IGST
-          </label>
+          <div>
+            <label className="mb-1.5 block stitch-label">&nbsp;</label>
+            <label className="flex items-center gap-2 border border-outline-variant bg-surface-white px-3 py-2 text-sm text-on-surface">
+              <input type="checkbox" {...register('is_igst')} disabled={!watchedIsGstOn} />
+              Use IGST
+            </label>
+          </div>
 
-          <label className="flex items-center gap-2 border border-outline-variant bg-surface-white px-3 py-2.5    text-on-surface">
-            <input type="checkbox" {...register('is_gst_on')} />
-            Apply GST
-          </label>
+          <div>
+            <label className="mb-1.5 block stitch-label">&nbsp;</label>
+            <label className="flex items-center gap-2 border border-outline-variant bg-surface-white px-3 py-2 text-sm text-on-surface">
+              <input type="checkbox" {...register('is_gst_on')} />
+              Apply GST
+            </label>
+          </div>
 
           <div>
             <label className="mb-1.5 block stitch-label">Manual total override</label>
