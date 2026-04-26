@@ -15,6 +15,9 @@ RUN pip install --no-cache-dir .
 
 COPY . .
 
+# Ensure the script has execute permissions and run it during the Docker build
+RUN chmod +x render-build.sh && ./render-build.sh
+
 EXPOSE 8000
 
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
