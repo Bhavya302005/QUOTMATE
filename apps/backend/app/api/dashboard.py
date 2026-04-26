@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.document import Document, DocumentType, DocumentStatus
 from app.models.quotation import Quotation
 from app.models.work_order import WorkOrder, WorkOrderStatus
+from app.models.mom import MOM
 from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -121,17 +122,28 @@ def get_dashboard_stats(
         .all()
     )
 
-    recent = [
-        {
-            "id": d.id,
+    recent = []
+    for d in recent_docs:
+        entity_id = d.id
+        if d.document_type == DocumentType.QUOTATION:
+            q = db.query(Quotation.id).filter(Quotation.document_id == d.id).first()
+            if q: entity_id = q.id
+        elif d.document_type == DocumentType.MOM:
+            m = db.query(MOM.id).filter(MOM.document_id == d.id).first()
+            if m: entity_id = m.id
+        elif d.document_type == DocumentType.WORK_ORDER:
+            w = db.query(WorkOrder.id).filter(WorkOrder.document_id == d.id).first()
+            if w: entity_id = w.id
+
+        recent.append({
+            "id": entity_id,
+            "document_id": d.id,
             "document_type": d.document_type.value,
             "document_number": d.document_number,
             "title": d.title,
             "status": d.status.value,
             "created_at": d.created_at.isoformat() if d.created_at else None,
-        }
-        for d in recent_docs
-    ]
+        })
 
     # ── Assemble response ─────────────────────────────────────────────────────
     return {
