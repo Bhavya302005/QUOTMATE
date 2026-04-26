@@ -34,7 +34,7 @@ export default function CameraCapture({ onCapture, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 md:left-64 flex flex-col bg-black text-white">
+    <div className="fixed inset-0 z-[60] md:left-64 flex flex-col bg-black text-white">
       <div className="flex items-center justify-between border-b border-white/20 px-4 py-3">
         <h2 className="font-mono uppercase tracking-widest">Camera</h2>
         <button
@@ -53,7 +53,7 @@ export default function CameraCapture({ onCapture, onClose }) {
         <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
       </div>
 
-      <div className="border-t border-white/20 bg-black px-6 pt-6 pb-28 md:pb-6 text-center">
+      <div className="border-t border-white/20 bg-black px-6 pt-6 pb-8 md:pb-6 text-center">
         {!hasPermission && (
           <p className="mb-3 font-mono text-sm text-error">{error || 'Camera permission required'}</p>
         )}
