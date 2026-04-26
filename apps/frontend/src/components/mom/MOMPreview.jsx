@@ -45,8 +45,9 @@ export default function MOMPreview({
     : null;
   return (
     <div className="space-y-4">
-      <div className="document-a4 bg-white p-12 md:p-16 flex flex-col font-['Inter'] relative selection:bg-black selection:text-white border border-black shadow-none mx-auto w-full max-w-[210mm] min-h-[297mm] overflow-hidden">
-        {/* Decorative Blueprint Elements */}
+      <div className="w-full overflow-x-auto overflow-y-hidden max-w-full pb-4">
+        <div className="document-a4 bg-white p-12 md:p-16 flex flex-col font-['Inter'] relative selection:bg-black selection:text-white border border-black shadow-none mx-auto min-w-[794px] max-w-[794px] min-h-[1123px] overflow-hidden">
+          {/* Decorative Blueprint Elements */}
         <div className="absolute top-0 right-0 w-32 h-32 border-r border-t border-black/5 -translate-y-16 translate-x-16 rotate-45 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-32 h-32 border-l border-b border-black/5 translate-y-16 -translate-x-16 rotate-45 pointer-events-none"></div>
 
@@ -240,6 +241,7 @@ export default function MOMPreview({
           </div>
           <div>Page 01 of 01</div>
         </div>
+      </div>
       </div>
 
       {showActions && (

@@ -46,8 +46,9 @@ export default function QuotationPreview({
     : null;
   return (
     <div className="space-y-4">
-      <div className="document-a4 bg-white p-12 flex flex-col font-['Inter'] relative selection:bg-black selection:text-white border border-neutral-200 shadow-sm mx-auto w-full max-w-[210mm] min-h-[297mm]">
-        {/* Branding Header */}
+      <div className="w-full overflow-x-auto overflow-y-hidden max-w-full pb-4">
+        <div className="document-a4 bg-white p-12 flex flex-col font-['Inter'] relative selection:bg-black selection:text-white border border-neutral-200 shadow-sm mx-auto min-w-[794px] max-w-[794px] min-h-[1123px]">
+          {/* Branding Header */}
         <div className="flex justify-between items-start mb-16">
           <div className="space-y-2">
             {/* Logo Box */}
@@ -171,6 +172,7 @@ export default function QuotationPreview({
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {showActions && (

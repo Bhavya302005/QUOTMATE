@@ -53,7 +53,7 @@ export default function CameraCapture({ onCapture, onClose }) {
         <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
       </div>
 
-      <div className="border-t border-white/20 bg-black px-6 py-6 text-center">
+      <div className="border-t border-white/20 bg-black px-6 pt-6 pb-28 md:pb-6 text-center">
         {!hasPermission && (
           <p className="mb-3 font-mono text-sm text-error">{error || 'Camera permission required'}</p>
         )}
