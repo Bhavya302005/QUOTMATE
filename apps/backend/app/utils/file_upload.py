@@ -19,9 +19,7 @@ class FileUploadService:
     
     def __init__(self):
         """Initialize file upload service"""
-        # Resolve absolute path to the backend uploads directory
-        backend_root = Path(__file__).resolve().parent.parent.parent
-        self.upload_dir = backend_root / "uploads"
+        self.upload_dir = Path("uploads")
         self.images_dir = self.upload_dir / "images"
         self.documents_dir = self.upload_dir / "documents"
         
