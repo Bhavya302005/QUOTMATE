@@ -11,7 +11,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(100), nullable=False)
     company_name = Column(String(200))
-    company_logo_url = Column(String(500))
+    company_logo_url = Column(Text)
     phone = Column(String(20))
     address = Column(Text)
     gst_number = Column(String(20))

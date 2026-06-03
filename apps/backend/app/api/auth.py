@@ -21,7 +21,9 @@ from app.services.audit_service import log_audit
 from app.utils.file_upload import file_upload_service
 import uuid
 import logging
-
+import base64
+from io import BytesIO
+from PIL import Image
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 logger = logging.getLogger("quotmate.auth")
 
@@ -307,7 +309,28 @@ async def upload_company_logo(
             detail=error_msg
         )
 
-    _, file_url = await file_upload_service.save_upload_file(file, "images")
+    file_bytes = await file.read()
+    file_url = None
+    
+    from app.utils.file_upload import cloudinary_service
+    if cloudinary_service.cloudinary_configured:
+        file_url = await cloudinary_service.upload_image(file_bytes, file.filename)
+        
+    if not file_url:
+        try:
+            img = Image.open(BytesIO(file_bytes))
+            if img.mode not in ('RGB', 'RGBA'):
+                img = img.convert('RGBA')
+            img.thumbnail((160, 160), Image.Resampling.LANCZOS)
+            output = BytesIO()
+            # Save as WEBP for aggressive compression with transparency support
+            img.save(output, format="WEBP", quality=80, method=4)
+            b64_str = base64.b64encode(output.getvalue()).decode("utf-8")
+            file_url = f"data:image/webp;base64,{b64_str}"
+        except Exception as e:
+            logger.error(f"Error converting image to base64: {e}")
+            await file.seek(0)
+            _, file_url = await file_upload_service.save_upload_file(file, "images")
     old_logo_url = current_user.company_logo_url
     current_user.company_logo_url = file_url
 

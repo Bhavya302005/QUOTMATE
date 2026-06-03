@@ -89,6 +89,21 @@ async def log_request_duration(request: Request, call_next):
 # But since we switched to SQLite locally, we can let SQLAlchemy create them:
 try:
     Base.metadata.create_all(bind=engine)
+    
+    # Automatically upgrade the company_logo_url column to LONGTEXT (for MySQL/Postgres support)
+    # to support storing base64 encoded logos
+    from sqlalchemy import text
+    with engine.begin() as conn:
+        try:
+            # MySQL syntax
+            conn.execute(text("ALTER TABLE users MODIFY company_logo_url LONGTEXT"))
+        except Exception:
+            pass
+        try:
+            # PostgreSQL syntax
+            conn.execute(text("ALTER TABLE users ALTER COLUMN company_logo_url TYPE TEXT"))
+        except Exception:
+            pass
 except Exception as e:
     print(f"Failed to initialize database tables on startup. Proceeding anyway. Error: {e}")
 

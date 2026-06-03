@@ -181,17 +181,21 @@ export default function MOMList() {
       ) : (
         <div className="mt-6 space-y-3">
           {filteredMoms.map((mom) => (
-            <div key={mom.id} className="border border-black bg-surface-white p-4 sm:p-5">
+            <Link 
+              key={mom.id} 
+              to={`/moms/${mom.id}`}
+              className="group block border border-black bg-surface-white p-4 sm:p-5 transition-colors duration-100 hover:bg-black hover:text-white cursor-pointer"
+            >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="line-clamp-1 text-base font-normal  tracking-tight text-on-surface">
+                  <h3 className="line-clamp-1 text-base font-normal tracking-tight">
                     {mom.meeting_title}
                   </h3>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="border border-black bg-white px-2 py-0.5  text-[9px]  ">
+                    <span className="border border-black bg-white px-2 py-0.5 text-[9px] text-black group-hover:border-white group-hover:bg-black group-hover:text-white">
                       {mom.mom_number || mom.id.slice(0, 8)}
                     </span>
-                    <span className="border border-black px-2 py-0.5  text-[9px]  ">
+                    <span className="border border-black px-2 py-0.5 text-[9px] group-hover:border-white">
                       {formatDate(mom.meeting_date)}
                     </span>
                   </div>
@@ -202,27 +206,30 @@ export default function MOMList() {
                   {mom.status || 'draft'}
                 </span>
               </div>
-              <div className="flex items-end justify-between border-t border-black pt-4">
-                <p className="line-clamp-2 max-w-[65%]   leading-snug text-outline-muted">
+              <div className="flex items-end justify-between border-t border-black pt-4 group-hover:border-white">
+                <p className="line-clamp-2 max-w-[65%] leading-snug text-outline-muted group-hover:text-white group-hover:opacity-80">
                   {mom.ai_summary || mom.raw_notes || 'No notes'}
                 </p>
                 <div className="flex shrink-0 items-center gap-2">
                   <Link
                     to={`/moms/${mom.id}`}
-                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-black hover:text-white"
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:!bg-white hover:!text-black group-hover:border-white group-hover:bg-black group-hover:text-white"
                   >
                     <Eye className="h-4 w-4" strokeWidth={2} />
                   </Link>
                   <button
                     type="button"
-                    onClick={() => handleDownload(mom)}
-                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-black hover:text-white"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDownload(mom);
+                    }}
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:!bg-white hover:!text-black group-hover:border-white group-hover:bg-black group-hover:text-white"
                   >
                     <Download className="h-4 w-4" strokeWidth={2} />
                   </button>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
