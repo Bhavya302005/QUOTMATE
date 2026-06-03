@@ -39,22 +39,25 @@ def get_dashboard_stats(
     now = datetime.utcnow()
 
     # ── Document counts grouped by type + status ──────────────────────────────
-    doc_rows = (
-        db.query(
-            Document.document_type,
-            Document.status,
-            func.count(Document.id).label("cnt"),
-        )
-        .filter(Document.user_id == user_id)
-        .group_by(Document.document_type, Document.status)
-        .all()
-    )
-
     type_totals: dict = {}
     status_breakdown: dict = {}
-    for doc_type, status, cnt in doc_rows:
-        type_totals[doc_type] = type_totals.get(doc_type, 0) + cnt
-        status_breakdown[f"{doc_type.value}_{status.value}"] = cnt
+    
+    # We will adjust counts to exclude orphaned documents
+    q_count = db.query(Document.status, func.count(Quotation.id)).join(Quotation, Document.id == Quotation.document_id).filter(Document.user_id == user_id).group_by(Document.status).all()
+    m_count = db.query(Document.status, func.count(MOM.id)).join(MOM, Document.id == MOM.document_id).filter(Document.user_id == user_id).group_by(Document.status).all()
+    w_count = db.query(Document.status, func.count(WorkOrder.id)).join(WorkOrder, Document.id == WorkOrder.document_id).filter(Document.user_id == user_id).group_by(Document.status).all()
+
+    for status, cnt in q_count:
+        type_totals[DocumentType.QUOTATION] = type_totals.get(DocumentType.QUOTATION, 0) + cnt
+        status_breakdown[f"{DocumentType.QUOTATION.value}_{status.value}"] = cnt
+        
+    for status, cnt in m_count:
+        type_totals[DocumentType.MOM] = type_totals.get(DocumentType.MOM, 0) + cnt
+        status_breakdown[f"{DocumentType.MOM.value}_{status.value}"] = cnt
+        
+    for status, cnt in w_count:
+        type_totals[DocumentType.WORK_ORDER] = type_totals.get(DocumentType.WORK_ORDER, 0) + cnt
+        status_breakdown[f"{DocumentType.WORK_ORDER.value}_{status.value}"] = cnt
 
     # ── All-time revenue (finalized quotations) ───────────────────────────────
     total_revenue = float(
@@ -118,13 +121,13 @@ def get_dashboard_stats(
         db.query(Document)
         .filter(Document.user_id == user_id)
         .order_by(Document.created_at.desc())
-        .limit(8)
+        .limit(20) # Fetch more to account for orphaned documents being skipped
         .all()
     )
 
     recent = []
     for d in recent_docs:
-        entity_id = d.id
+        entity_id = None
         if d.document_type == DocumentType.QUOTATION:
             q = db.query(Quotation.id).filter(Quotation.document_id == d.id).first()
             if q: entity_id = q.id
@@ -134,16 +137,19 @@ def get_dashboard_stats(
         elif d.document_type == DocumentType.WORK_ORDER:
             w = db.query(WorkOrder.id).filter(WorkOrder.document_id == d.id).first()
             if w: entity_id = w.id
-
-        recent.append({
-            "id": entity_id,
-            "document_id": d.id,
-            "document_type": d.document_type.value,
-            "document_number": d.document_number,
-            "title": d.title,
-            "status": d.status.value,
-            "created_at": d.created_at.isoformat() if d.created_at else None,
-        })
+            
+        if entity_id: # Only include if not orphaned
+            recent.append({
+                "id": entity_id,
+                "document_id": d.id,
+                "document_type": d.document_type.value,
+                "document_number": d.document_number,
+                "title": d.title,
+                "status": d.status.value,
+                "created_at": d.created_at.isoformat() if d.created_at else None,
+            })
+            if len(recent) == 8:
+                break
 
     # ── Assemble response ─────────────────────────────────────────────────────
     return {
