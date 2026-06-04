@@ -19,13 +19,38 @@ from app.utils.auth import (
 )
 from app.services.audit_service import log_audit
 from app.utils.file_upload import file_upload_service
+from app.utils.logo_storage import (
+    encode_logo_to_data_url,
+    is_valid_persisted_logo,
+    sanitize_logo_url,
+    verify_logo_saved,
+)
 import uuid
 import logging
-import base64
-from io import BytesIO
-from PIL import Image
+
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 logger = logging.getLogger("quotmate.auth")
+
+
+def _build_user_response(user: User, db: Session | None = None) -> UserResponse:
+    """Return user profile data with only durable logo URLs."""
+    logo = user.company_logo_url
+    if logo and not is_valid_persisted_logo(logo):
+        logger.info(
+            "clearing_invalid_company_logo user_id=%s stored_len=%s",
+            user.id,
+            len(logo),
+        )
+        if db is not None:
+            user.company_logo_url = None
+            db.commit()
+            db.refresh(user)
+
+    response = UserResponse.model_validate(user)
+    clean_logo = sanitize_logo_url(response.company_logo_url)
+    if clean_logo != response.company_logo_url:
+        return response.model_copy(update={"company_logo_url": clean_logo})
+    return response
 
 
 def _normalize_email(email: str) -> str:
@@ -200,13 +225,14 @@ async def login(
     return LoginResponse(
         access_token=access_token,
         token_type="bearer",
-        user=UserResponse.from_orm(user)
+        user=_build_user_response(user, db),
     )
 
 
 @router.get("/profile", response_model=UserResponse)
 async def get_profile(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Get current user's profile
@@ -214,7 +240,7 @@ async def get_profile(
     Requires valid JWT token in Authorization header:
     `Authorization: Bearer <token>`
     """
-    return UserResponse.from_orm(current_user)
+    return _build_user_response(current_user, db)
 
 
 @router.put("/profile", response_model=UserResponse)
@@ -285,7 +311,7 @@ async def update_profile(
         ip_address=request.client.host if request.client else None
     )
     
-    return UserResponse.from_orm(current_user)
+    return _build_user_response(current_user, db)
 
 
 @router.post("/upload-logo", response_model=UserResponse)
@@ -308,39 +334,30 @@ async def upload_company_logo(
         )
 
     file_bytes = await file.read()
-    file_url = None
 
-    from app.utils.file_upload import cloudinary_service
-    if cloudinary_service.cloudinary_configured:
-        file_url = await cloudinary_service.upload_image(file_bytes, file.filename)
-
-    if not file_url:
-        try:
-            img = Image.open(BytesIO(file_bytes))
-            if img.mode not in ("RGB", "RGBA"):
-                img = img.convert("RGBA")
-            img.thumbnail((160, 160), Image.Resampling.LANCZOS)
-            output = BytesIO()
-            img.save(output, format="WEBP", quality=80, method=4)
-            b64_str = base64.b64encode(output.getvalue()).decode("utf-8")
-            file_url = f"data:image/webp;base64,{b64_str}"
-        except Exception as e:
-            logger.error("Error converting logo to persistent storage: %s", e)
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Could not process logo image. Try JPG or PNG under 5MB.",
-            ) from e
-
-    if not file_url:
+    try:
+        file_url = encode_logo_to_data_url(file_bytes)
+    except Exception as e:
+        logger.error("Error converting logo to persistent storage: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Logo upload failed. Please try again.",
-        )
+            detail="Could not process logo image. Try JPG or PNG under 5MB.",
+        ) from e
+
     old_logo_url = current_user.company_logo_url
     current_user.company_logo_url = file_url
 
-    db.commit()
-    db.refresh(current_user)
+    try:
+        db.commit()
+        db.refresh(current_user)
+        verify_logo_saved(file_url, current_user.company_logo_url)
+    except ValueError as e:
+        db.rollback()
+        logger.error("Logo persistence check failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
 
     log_audit(
         db=db,
@@ -353,4 +370,4 @@ async def upload_company_logo(
         ip_address=request.client.host if request.client else None
     )
 
-    return UserResponse.from_orm(current_user)
+    return _build_user_response(current_user, db)

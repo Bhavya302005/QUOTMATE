@@ -58,11 +58,32 @@ uploads_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 
 
+def _run_db_migrations() -> None:
+    """Apply Alembic migrations on wake (Render has no persistent disk for build-only migrate)."""
+    if settings.DATABASE_URL.startswith("sqlite"):
+        return
+    try:
+        from alembic.config import Config
+        from alembic import command
+
+        backend_root = Path(__file__).resolve().parent.parent
+        alembic_cfg = Config(str(backend_root / "alembic.ini"))
+        alembic_cfg.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+        command.upgrade(alembic_cfg, "head")
+        logger.info("database migrations applied")
+    except Exception as exc:
+        logger.warning("database migrations skipped or failed: %s", exc)
+
+
 @app.on_event("startup")
 async def log_startup_event() -> None:
     logger.info("startup event: QuotMate API is starting")
     logger.info("runtime auth_config token_expiry_hours=%s", settings.ACCESS_TOKEN_EXPIRE_HOURS)
     logger.info("runtime db_config %s", _database_runtime_summary(settings.DATABASE_URL))
+    _run_db_migrations()
+    from app.utils.logo_storage import ensure_logo_column_width
+
+    ensure_logo_column_width(engine)
 
 
 @app.on_event("shutdown")
@@ -89,21 +110,6 @@ async def log_request_duration(request: Request, call_next):
 # But since we switched to SQLite locally, we can let SQLAlchemy create them:
 try:
     Base.metadata.create_all(bind=engine)
-    
-    # Automatically upgrade the company_logo_url column to LONGTEXT (for MySQL/Postgres support)
-    # to support storing base64 encoded logos
-    from sqlalchemy import text
-    with engine.begin() as conn:
-        try:
-            # MySQL syntax
-            conn.execute(text("ALTER TABLE users MODIFY company_logo_url LONGTEXT"))
-        except Exception:
-            pass
-        try:
-            # PostgreSQL syntax
-            conn.execute(text("ALTER TABLE users ALTER COLUMN company_logo_url TYPE TEXT"))
-        except Exception:
-            pass
 except Exception as e:
     print(f"Failed to initialize database tables on startup. Proceeding anyway. Error: {e}")
 

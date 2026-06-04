@@ -7,10 +7,19 @@ import { getApiErrorMessage, getMediaUrl } from '../services/api';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 
+function isDisplayableLogo(url) {
+  if (!url) return false;
+  if (url.startsWith('/uploads/')) return false;
+  if (url.startsWith('data:') && url.length < 800) return false;
+  return true;
+}
+
 export default function ProfilePage() {
   const { user, updateProfile, uploadLogo } = useAuth();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoLoadFailed, setLogoLoadFailed] = useState(false);
   const logoInputRef = useRef(null);
+  const showLogo = isDisplayableLogo(user?.company_logo_url) && !logoLoadFailed;
 
   const {
     register,
@@ -28,6 +37,10 @@ export default function ProfilePage() {
       default_terms_conditions: '',
     },
   });
+
+  useEffect(() => {
+    setLogoLoadFailed(false);
+  }, [user?.company_logo_url]);
 
   useEffect(() => {
     if (!user) return;
@@ -90,13 +103,14 @@ export default function ProfilePage() {
             <p className="mb-4 stitch-label">Company logo</p>
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden border border-black bg-white sm:h-28 sm:w-28">
-                {user?.company_logo_url ? (
+                {showLogo ? (
                   <img
                     src={getMediaUrl(user.company_logo_url)}
                     alt="Company logo"
                     className="h-full w-full object-contain p-2"
                     width="128"
                     height="128"
+                    onError={() => setLogoLoadFailed(true)}
                   />
                 ) : (
                   <Building2 className="h-10 w-10 text-on-surface" strokeWidth={1.75} />
@@ -108,6 +122,11 @@ export default function ProfilePage() {
                   <p className="mt-1    text-outline-muted">
                     JPG, PNG, WEBP, GIF up to 5MB
                   </p>
+                  {(logoLoadFailed || (user?.company_logo_url && !showLogo)) && (
+                    <p className="mt-1 text-xs text-amber-700">
+                      Previous logo could not be loaded. Upload again to save it permanently.
+                    </p>
+                  )}
                 </div>
                 <input
                   ref={logoInputRef}
