@@ -25,7 +25,6 @@ export default function ProfilePage() {
       phone: '',
       address: '',
       gst_number: '',
-      company_logo_url: '',
       default_terms_conditions: '',
     },
   });
@@ -39,7 +38,6 @@ export default function ProfilePage() {
       phone: user.phone || '',
       address: user.address || '',
       gst_number: user.gst_number || '',
-      company_logo_url: user.company_logo_url || '',
       default_terms_conditions: user.default_terms_conditions || '',
     });
   }, [user, reset]);

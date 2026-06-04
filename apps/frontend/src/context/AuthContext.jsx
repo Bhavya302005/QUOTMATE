@@ -60,7 +60,8 @@ export function AuthProvider({ children }) {
   };
 
   const updateProfile = async (data) => {
-    const response = await authAPI.updateProfile(data);
+    const { company_logo_url: _logo, ...profileFields } = data;
+    const response = await authAPI.updateProfile(profileFields);
     setUser(response.data);
     return response.data;
   };

@@ -27,13 +27,14 @@ class UserLogin(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
+    """Profile fields updatable via PUT /profile. Logo is only changed via POST /upload-logo."""
+
     email: Optional[EmailStr] = Field(None)
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)
     company_name: Optional[str] = Field(None, max_length=100)
     phone: Optional[str] = Field(None, max_length=15)
     address: Optional[str] = Field(None, max_length=500)
     gst_number: Optional[str] = Field(None, max_length=15)
-    company_logo_url: Optional[str] = Field(None, max_length=500)
     default_terms_conditions: Optional[str] = Field(None, max_length=2000)
     
     @validator('gst_number')

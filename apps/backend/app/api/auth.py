@@ -234,7 +234,7 @@ async def update_profile(
     - **phone**: Update phone number
     - **address**: Update address
     - **gst_number**: Update GST number (15 characters)
-    - **company_logo_url**: Update company logo URL
+    Logo changes use POST /auth/upload-logo only.
     """
     # Store old values for audit log
     old_values = {
@@ -244,7 +244,6 @@ async def update_profile(
         "phone": current_user.phone,
         "address": current_user.address,
         "gst_number": current_user.gst_number,
-        "company_logo_url": current_user.company_logo_url,
         "default_terms_conditions": current_user.default_terms_conditions
     }
     
@@ -271,7 +270,6 @@ async def update_profile(
         "phone": current_user.phone,
         "address": current_user.address,
         "gst_number": current_user.gst_number,
-        "company_logo_url": current_user.company_logo_url,
         "default_terms_conditions": current_user.default_terms_conditions
     }
     
@@ -311,26 +309,33 @@ async def upload_company_logo(
 
     file_bytes = await file.read()
     file_url = None
-    
+
     from app.utils.file_upload import cloudinary_service
     if cloudinary_service.cloudinary_configured:
         file_url = await cloudinary_service.upload_image(file_bytes, file.filename)
-        
+
     if not file_url:
         try:
             img = Image.open(BytesIO(file_bytes))
-            if img.mode not in ('RGB', 'RGBA'):
-                img = img.convert('RGBA')
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGBA")
             img.thumbnail((160, 160), Image.Resampling.LANCZOS)
             output = BytesIO()
-            # Save as WEBP for aggressive compression with transparency support
             img.save(output, format="WEBP", quality=80, method=4)
             b64_str = base64.b64encode(output.getvalue()).decode("utf-8")
             file_url = f"data:image/webp;base64,{b64_str}"
         except Exception as e:
-            logger.error(f"Error converting image to base64: {e}")
-            await file.seek(0)
-            _, file_url = await file_upload_service.save_upload_file(file, "images")
+            logger.error("Error converting logo to persistent storage: %s", e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not process logo image. Try JPG or PNG under 5MB.",
+            ) from e
+
+    if not file_url:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Logo upload failed. Please try again.",
+        )
     old_logo_url = current_user.company_logo_url
     current_user.company_logo_url = file_url
 
