@@ -109,19 +109,10 @@ class OCRService:
         payload_kb = len(image_b64) / 1024
         print(f"  📦 API payload: {payload_kb:.0f} KB base64")
         
-        # --- STRICT SYSTEM PROMPT FOR ACCURATE OCR ---
-        # Mistral Large 3 675B is used for precise handwriting transcription
         system_instruction = (
-            "You are a precise OCR engine designed for digitizing handwritten documents, "
-            "especially Indian business quotations, invoices, and construction estimates. "
-            "Rules:\n"
-            "1. Output ONLY the text found in the image. Do NOT include conversational fillers like 'Here is the text' or 'The image contains'.\n"
-            "2. Transcribe VERBATIM. Do not correct grammar, spelling, or summarize.\n"
-            "3. Maintain original line breaks and layout structure (columns, tables).\n"
-            "4. For tables: use | to separate columns. Preserve numbers exactly as written.\n"
-            "5. Preserve all numbers, dates, phone numbers, amounts EXACTLY as written.\n"
-            "6. Do NOT fabricate or guess any text. If something is illegible, write [illegible].\n"
-            "7. Indian language terms, abbreviations (sq ft, nos, PVC, EWC, etc.) should be kept as-is."
+            "You are a precise OCR engine. Output ONLY the text found in the image verbatim. "
+            "Do NOT add conversational text. Maintain original layout. Use | for table columns. "
+            "Preserve all numbers exactly. Write [illegible] for unclear text."
         )
 
         user_prompt = (
@@ -162,8 +153,8 @@ class OCRService:
                     ]
                 }
             ],
-            "max_tokens": 2048,
-            "temperature": 0.1, # Low temp for high fidelity/determinism
+            "max_tokens": 1024,
+            "temperature": 0.1,
             "top_p": 0.1
         }
         
@@ -174,8 +165,7 @@ class OCRService:
         
         for attempt in range(max_attempts):
             try:
-                # Make API call (120s timeout — was 60s, too tight for 90B model)
-                response = requests.post(self.invoke_url, headers=headers, json=payload, timeout=120)
+                response = requests.post(self.invoke_url, headers=headers, json=payload, timeout=30)
                 
                 # Log detailed error if request fails
                 if response.status_code != 200:
@@ -221,8 +211,8 @@ class OCRService:
             except requests.exceptions.Timeout:
                 last_error = "NVIDIA NIMs API request timed out"
                 if attempt < max_attempts - 1:
-                    print(f"⚠️  Timeout on attempt {attempt + 1}, retrying in 5s...")
-                    _time.sleep(5)
+                    print(f"⚠️  Timeout on attempt {attempt + 1}, retrying in 2s...")
+                    _time.sleep(2)
                     continue
                 raise Exception(last_error)
             except requests.exceptions.RequestException as e:
@@ -230,7 +220,7 @@ class OCRService:
             except (KeyError, IndexError) as e:
                 raise Exception(f"Failed to parse NVIDIA NIMs response: {str(e)}")
     
-    def _compress_for_api(self, image_bytes: bytes, max_width: int = 2048, quality: int = 92) -> bytes:
+    def _compress_for_api(self, image_bytes: bytes, max_width: int = 1200, quality: int = 75) -> bytes:
         """
         Compress image to JPEG before sending to the API.
         Reduces payload from 3-5 MB (PNG) to 200-400 KB (JPEG).

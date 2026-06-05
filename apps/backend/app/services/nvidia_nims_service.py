@@ -21,15 +21,15 @@ class NVIDIANIMsService:
         self.api_key = os.getenv("NVIDIA_API_KEY")
         self.base_url = "https://integrate.api.nvidia.com/v1"
         
-        # Primary model: Llama 3.3 70B (fast, reliable, ~0.3s response)
-        self.primary_model = "meta/llama-3.3-70b-instruct"
+        # Primary model: Llama 3.1 8B (very fast, ~1-2s response for JSON extraction)
+        self.primary_model = "meta/llama-3.1-8b-instruct"
         
-        # Build model chain: primary → configured → fallbacks
+        # Build model chain: primary → 70B fallback
         configured_model = os.getenv("NVIDIA_CHAT_MODEL")
         self.chat_models = [self.primary_model]
         if configured_model and configured_model not in self.chat_models:
             self.chat_models.append(configured_model)
-        for fallback in ["meta/llama-3.1-70b-instruct"]:
+        for fallback in ["meta/llama-3.3-70b-instruct", "meta/llama-3.1-70b-instruct"]:
             if fallback not in self.chat_models:
                 self.chat_models.append(fallback)
         
@@ -68,7 +68,7 @@ class NVIDIANIMsService:
                         "presence_penalty": 0.00,
                         "stream": False
                     },
-                    timeout=180
+                    timeout=30
                 )
                 
                 if response.status_code == 404:
@@ -181,7 +181,7 @@ Return a JSON object with this EXACT structure:
 
 Return ONLY valid JSON. No explanation text before or after."""
         
-        ai_output = self._call_model(system_prompt, user_prompt, temperature=0.1)
+        ai_output = self._call_model(system_prompt, user_prompt, temperature=0.1, max_tokens=1024)
         
         if not ai_output:
             # AI unavailable - return empty with flags

@@ -45,13 +45,13 @@ def analyze_image_complexity(image: Image.Image) -> dict:
     }
 
     # If image is tall (like A4/Receipt), tiling is needed for Llama 3.2
-    if height > 1500 or (aspect_ratio > 1.5 and height > 1000):
+    if height > 2500 or (aspect_ratio > 1.5 and height > 1500):
         strategy["should_tile"] = True
-        strategy["tile_count"] = max(2, int(height / 1000) + 1)
+        strategy["tile_count"] = max(2, int(height / 1500) + 1)
     
     return strategy
 
-def slice_image(image: Image.Image, tiles: int, overlap: int = 450) -> List[bytes]:
+def slice_image(image: Image.Image, tiles: int, overlap: int = 200) -> List[bytes]:
     """
     Slices image vertically with significant overlap to ensure no text loss.
     Tiles are saved as compressed JPEG and resized to max 1024px width
@@ -191,7 +191,7 @@ async def process_uploaded_image(
         # STRATEGY: TILING (Accuracy Mode + Tall Image)
         if mode == "accuracy" and img_analysis["should_tile"] and engine != "tesseract":
             # Slice with overlap
-            slices = slice_image(pil_image, tiles=img_analysis["tile_count"], overlap=450)
+            slices = slice_image(pil_image, tiles=img_analysis["tile_count"], overlap=200)
             
             # Parallel Execution
             tasks = [
@@ -313,7 +313,7 @@ async def process_base64_image(
         if mode == "accuracy" and img_analysis["should_tile"]:
             # Tiling strategy
             pil_image_processed = Image.open(io.BytesIO(processed_bytes))
-            slices = slice_image(pil_image_processed, tiles=img_analysis["tile_count"], overlap=450)
+            slices = slice_image(pil_image_processed, tiles=img_analysis["tile_count"], overlap=200)
             
             tasks = [
                 ocr_service.extract_text_from_bytes(slice_bytes, lang_hints_list, engine="auto")
