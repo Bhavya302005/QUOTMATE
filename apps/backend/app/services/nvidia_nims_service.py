@@ -181,7 +181,7 @@ Return a JSON object with this EXACT structure:
 
 Return ONLY valid JSON. No explanation text before or after."""
         
-        ai_output = self._call_model(system_prompt, user_prompt, temperature=0.1, max_tokens=1024)
+        ai_output = self._call_model(system_prompt, user_prompt, temperature=0.1, max_tokens=2048)
         
         if not ai_output:
             # AI unavailable - return empty with flags

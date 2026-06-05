@@ -45,7 +45,7 @@ def analyze_image_complexity(image: Image.Image) -> dict:
     }
 
     # If image is tall (like A4/Receipt), tiling is needed for Llama 3.2
-    if height > 2500 or (aspect_ratio > 1.5 and height > 1500):
+    if height > 1800 or (aspect_ratio > 1.5 and height > 1200):
         strategy["should_tile"] = True
         strategy["tile_count"] = max(2, int(height / 1500) + 1)
     
