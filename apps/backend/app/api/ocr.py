@@ -91,7 +91,7 @@ def slice_image(image: Image.Image, tiles: int, overlap: int = 450) -> List[byte
         
     return slices
 
-def stitch_text(text_blocks: List[str], overlap_length: int = 400, use_ai: bool = True) -> str:
+def stitch_text(text_blocks: List[str], overlap_length: int = 400, use_ai: bool = False) -> str:
     """
     Intelligently merges text blocks by finding overlapping sentences 
     and removing duplicates.

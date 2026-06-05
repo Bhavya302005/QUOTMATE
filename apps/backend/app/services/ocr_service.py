@@ -19,7 +19,7 @@ class OCRService:
         self.invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
         # Vision model: must be a multimodal model that accepts image input
         # Mistral Large 3 675B is text-only — cannot process images
-        self.model = os.getenv("NVIDIA_VISION_MODEL", "meta/llama-3.2-90b-vision-instruct")
+        self.model = os.getenv("NVIDIA_VISION_MODEL", "meta/llama-3.2-11b-vision-instruct")
         self.use_tesseract_fallback = os.getenv("USE_TESSERACT_FALLBACK", "true").lower() == "true"
         
         if not self.api_key:
