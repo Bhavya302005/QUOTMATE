@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Text, TIMESTAMP
+from sqlalchemy import Column, String, Boolean, Text, TIMESTAMP, LargeBinary
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
@@ -12,6 +12,8 @@ class User(Base):
     full_name = Column(String(100), nullable=False)
     company_name = Column(String(200))
     company_logo_url = Column(Text)
+    company_logo_mime = Column(String(64))
+    company_logo_data = Column(LargeBinary)
     phone = Column(String(20))
     address = Column(Text)
     gst_number = Column(String(20))

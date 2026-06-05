@@ -42,6 +42,26 @@ export function getMediaUrl(url) {
   }
 }
 
+/** Logo URL for <img src> — uses DB-backed endpoint so it survives Render restarts. */
+export function getCompanyLogoSrc(user) {
+  if (!user) return null;
+
+  if (user.has_company_logo) {
+    const token = localStorage.getItem('access_token');
+    if (!token) return null;
+    const base = API_URL.replace(/\/$/, '');
+    const version = user.updated_at
+      ? new Date(user.updated_at).getTime()
+      : Date.now();
+    return `${base}/auth/company-logo?access_token=${encodeURIComponent(token)}&v=${version}`;
+  }
+
+  const url = user.company_logo_url;
+  if (!url || url.includes('/uploads/')) return null;
+  if (url.startsWith('data:') && url.length < 800) return null;
+  return getMediaUrl(url);
+}
+
 // Request interceptor - Add auth token
 api.interceptors.request.use(
   (config) => {

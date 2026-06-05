@@ -16,6 +16,7 @@ from app.schemas.mom import (
     SummarizeResponse
 )
 from app.utils.auth import get_current_user
+from app.utils.logo_storage import get_company_logo_data_uri
 from app.services.audit_service import log_audit
 from app.services.nvidia_nims_service import nvidia_nims_service
 from typing import Optional
@@ -113,7 +114,7 @@ def _build_mom_pdf_data(mom: MOM, document: Document, action_items: list, curren
             "email": current_user.email,
             "address": current_user.address,
             "company_name": current_user.company_name,
-            "company_logo_url": current_user.company_logo_url
+            "company_logo_url": get_company_logo_data_uri(current_user),
         }
     }
 

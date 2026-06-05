@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Download, FileDown, Pencil } from 'lucide-react';
 import Button from '../common/Button';
 import { useAuth } from '../../hooks/useAuth';
-import { getMediaUrl } from '../../services/api';
+import { getCompanyLogoSrc } from '../../services/api';
 
 
 function formatAmount(value) {
@@ -41,7 +41,7 @@ export default function QuotationPreview({
   const taxTotal = Number(quotation.cgst_amount || 0) + Number(quotation.sgst_amount || 0) + Number(quotation.igst_amount || 0);
 
   // Logo Resolution
-  const logoUrl = getMediaUrl(user?.company_logo_url);
+  const logoUrl = getCompanyLogoSrc(user);
   return (
     <div className="space-y-4">
       <div className="w-full overflow-x-auto overflow-y-hidden max-w-full pb-4">

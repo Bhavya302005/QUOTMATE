@@ -53,7 +53,8 @@ class UserResponse(BaseModel):
     phone: Optional[str]
     address: Optional[str]
     gst_number: Optional[str]
-    company_logo_url: Optional[str]
+    company_logo_url: Optional[str] = None
+    has_company_logo: bool = False
     default_terms_conditions: Optional[str]
     is_admin: bool
     created_at: datetime

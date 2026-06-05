@@ -81,9 +81,9 @@ async def log_startup_event() -> None:
     logger.info("runtime auth_config token_expiry_hours=%s", settings.ACCESS_TOKEN_EXPIRE_HOURS)
     logger.info("runtime db_config %s", _database_runtime_summary(settings.DATABASE_URL))
     _run_db_migrations()
-    from app.utils.logo_storage import ensure_logo_column_width
+    from app.utils.logo_storage import ensure_logo_columns
 
-    ensure_logo_column_width(engine)
+    ensure_logo_columns(engine)
 
 
 @app.on_event("shutdown")

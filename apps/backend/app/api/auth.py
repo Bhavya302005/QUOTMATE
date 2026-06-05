@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, Request, UploadFile, File, Query
+from fastapi.responses import Response, RedirectResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from typing import Optional
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import (
@@ -15,14 +18,17 @@ from app.utils.auth import (
     hash_password,
     verify_password,
     create_access_token,
-    get_current_user
+    get_current_user,
+    decode_token,
 )
 from app.services.audit_service import log_audit
 from app.utils.file_upload import file_upload_service
 from app.utils.logo_storage import (
-    encode_logo_to_data_url,
-    is_valid_persisted_logo,
-    sanitize_logo_url,
+    get_logo_bytes,
+    is_durable_external_url,
+    migrate_legacy_logo,
+    set_user_logo,
+    user_has_logo,
     verify_logo_saved,
 )
 import uuid
@@ -30,27 +36,31 @@ import logging
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 logger = logging.getLogger("quotmate.auth")
+optional_bearer = HTTPBearer(auto_error=False)
 
 
-def _build_user_response(user: User, db: Session | None = None) -> UserResponse:
-    """Return user profile data with only durable logo URLs."""
-    logo = user.company_logo_url
-    if logo and not is_valid_persisted_logo(logo):
-        logger.info(
-            "clearing_invalid_company_logo user_id=%s stored_len=%s",
-            user.id,
-            len(logo),
-        )
-        if db is not None:
-            user.company_logo_url = None
-            db.commit()
-            db.refresh(user)
+def user_to_response(user: User, db: Session) -> UserResponse:
+    """Build API user payload; migrates legacy logo formats when needed."""
+    migrate_legacy_logo(user, db)
+    external_url = None
+    if not user.company_logo_data and is_durable_external_url(user.company_logo_url):
+        external_url = user.company_logo_url
 
-    response = UserResponse.model_validate(user)
-    clean_logo = sanitize_logo_url(response.company_logo_url)
-    if clean_logo != response.company_logo_url:
-        return response.model_copy(update={"company_logo_url": clean_logo})
-    return response
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        company_name=user.company_name,
+        phone=user.phone,
+        address=user.address,
+        gst_number=user.gst_number,
+        company_logo_url=external_url,
+        has_company_logo=user_has_logo(user),
+        default_terms_conditions=user.default_terms_conditions,
+        is_admin=user.is_admin,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+    )
 
 
 def _normalize_email(email: str) -> str:
@@ -225,7 +235,7 @@ async def login(
     return LoginResponse(
         access_token=access_token,
         token_type="bearer",
-        user=_build_user_response(user, db),
+        user=user_to_response(user, db),
     )
 
 
@@ -240,7 +250,59 @@ async def get_profile(
     Requires valid JWT token in Authorization header:
     `Authorization: Bearer <token>`
     """
-    return _build_user_response(current_user, db)
+    return user_to_response(current_user, db)
+
+
+@router.get("/company-logo")
+async def get_company_logo(
+    access_token: Optional[str] = Query(None),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_bearer),
+    db: Session = Depends(get_db),
+):
+    """
+    Serve the authenticated user's company logo as image bytes.
+
+    Accepts Bearer header or ?access_token= query param (for <img> tags).
+    """
+    raw_token = access_token or (credentials.credentials if credentials else None)
+    if not raw_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+
+    payload = decode_token(raw_token)
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    migrate_legacy_logo(user, db)
+    stored = get_logo_bytes(user)
+    if stored:
+        mime, data = stored
+        return Response(
+            content=data,
+            media_type=mime,
+            headers={"Cache-Control": "private, max-age=86400"},
+        )
+
+    if is_durable_external_url(user.company_logo_url):
+        return RedirectResponse(url=user.company_logo_url, status_code=307)
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="No company logo",
+    )
 
 
 @router.put("/profile", response_model=UserResponse)
@@ -311,7 +373,7 @@ async def update_profile(
         ip_address=request.client.host if request.client else None
     )
     
-    return _build_user_response(current_user, db)
+    return user_to_response(current_user, db)
 
 
 @router.post("/upload-logo", response_model=UserResponse)
@@ -322,7 +384,7 @@ async def upload_company_logo(
     db: Session = Depends(get_db)
 ):
     """
-    Upload company logo image and save URL in current user's profile.
+    Upload company logo image and persist it in the database.
 
     Accepts common image formats (jpg, jpeg, png, gif, bmp, tiff, webp).
     """
@@ -334,29 +396,26 @@ async def upload_company_logo(
         )
 
     file_bytes = await file.read()
+    had_logo = user_has_logo(current_user)
 
     try:
-        file_url = encode_logo_to_data_url(file_bytes)
-    except Exception as e:
-        logger.error("Error converting logo to persistent storage: %s", e)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Could not process logo image. Try JPG or PNG under 5MB.",
-        ) from e
-
-    old_logo_url = current_user.company_logo_url
-    current_user.company_logo_url = file_url
-
-    try:
+        _mime, data = set_user_logo(current_user, file_bytes)
         db.commit()
         db.refresh(current_user)
-        verify_logo_saved(file_url, current_user.company_logo_url)
+        verify_logo_saved(current_user, len(data))
     except ValueError as e:
         db.rollback()
         logger.error("Logo persistence check failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
+        ) from e
+    except Exception as e:
+        db.rollback()
+        logger.error("Error saving logo: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not process logo image. Try JPG or PNG under 5MB.",
         ) from e
 
     log_audit(
@@ -365,9 +424,9 @@ async def upload_company_logo(
         action="upload_logo",
         entity_type="user",
         entity_id=current_user.id,
-        old_value={"company_logo_url": old_logo_url},
-        new_value={"company_logo_url": file_url},
+        old_value={"had_logo": had_logo},
+        new_value={"had_logo": True, "bytes": len(current_user.company_logo_data or b"")},
         ip_address=request.client.host if request.client else None
     )
 
-    return _build_user_response(current_user, db)
+    return user_to_response(current_user, db)

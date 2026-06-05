@@ -17,6 +17,7 @@ from app.schemas.quotation import (
     OCRToQuotationResponse
 )
 from app.utils.auth import get_current_user
+from app.utils.logo_storage import get_company_logo_data_uri
 from app.services.audit_service import log_audit
 from app.services.gst_calculator import gst_calculator
 from app.services.quotation_mapper import quotation_mapper
@@ -592,7 +593,7 @@ async def finalize_quotation(
         'phone': current_user.phone,
         'address': current_user.address,
         'gst_number': current_user.gst_number,
-        'company_logo_url': current_user.company_logo_url
+        'company_logo_url': get_company_logo_data_uri(current_user),
     }
     
     items_list = [
@@ -774,7 +775,7 @@ async def download_quotation_pdf(
         'phone': current_user.phone,
         'address': current_user.address,
         'gst_number': current_user.gst_number,
-        'company_logo_url': current_user.company_logo_url,
+        'company_logo_url': get_company_logo_data_uri(current_user),
     }
 
     items_list = [
