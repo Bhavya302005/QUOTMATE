@@ -128,7 +128,7 @@ export const quotationAPI = {
   list: (params) => api.get('/quotations', { params }),
   get: (id) => api.get(`/quotations/${id}`),
   update: (id, data) => api.put(`/quotations/${id}`, data),
-  delete: (id) => api.delete(`/quotations/${id}`),
+  delete: (id, deduct_revenue = true) => api.delete(`/quotations/${id}?deduct_revenue=${deduct_revenue}`),
   fromOCR: (data) => api.post('/quotations/from-ocr', data, { timeout: 120000 }),
   calculate: (data) => api.post('/quotations/calculate', data),
   finalize: (id) => api.post(`/quotations/${id}/finalize`),
@@ -200,7 +200,7 @@ export const dashboardAPI = {
 
 export const documentsAPI = {
   search: (params) => api.get('/documents', { params }),
-  delete: (id) => api.delete(`/documents/${id}`),
+  delete: (id, deduct_revenue = true) => api.delete(`/documents/${id}?deduct_revenue=${deduct_revenue}`),
 };
 
 export default api;

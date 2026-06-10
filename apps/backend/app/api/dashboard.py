@@ -8,6 +8,7 @@ from app.models.document import Document, DocumentType, DocumentStatus
 from app.models.quotation import Quotation
 from app.models.work_order import WorkOrder, WorkOrderStatus
 from app.models.mom import MOM
+from app.models.revenue_adjustment import RevenueAdjustment
 from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -60,6 +61,12 @@ def get_dashboard_stats(
         status_breakdown[f"{DocumentType.WORK_ORDER.value}_{status.value}"] = cnt
 
     # ── All-time revenue (finalized quotations) ───────────────────────────────
+    total_rev_adj = float(
+        db.query(func.sum(RevenueAdjustment.amount))
+        .filter(RevenueAdjustment.user_id == user_id)
+        .scalar() or 0
+    )
+
     total_revenue = float(
         db.query(func.sum(Quotation.grand_total))
         .join(Document, Document.id == Quotation.document_id)
@@ -69,10 +76,20 @@ def get_dashboard_stats(
         )
         .scalar()
         or 0
-    )
+    ) + total_rev_adj
 
     # ── Current-month revenue ─────────────────────────────────────────────────
     month_start, _ = _month_range(now, 0)
+    
+    monthly_rev_adj = float(
+        db.query(func.sum(RevenueAdjustment.amount))
+        .filter(
+            RevenueAdjustment.user_id == user_id,
+            RevenueAdjustment.date >= month_start,
+        )
+        .scalar() or 0
+    )
+
     monthly_revenue = float(
         db.query(func.sum(Quotation.grand_total))
         .join(Document, Document.id == Quotation.document_id)
@@ -83,7 +100,7 @@ def get_dashboard_stats(
         )
         .scalar()
         or 0
-    )
+    ) + monthly_rev_adj
 
     # ── Work-order status breakdown ───────────────────────────────────────────
     wo_rows = (
@@ -102,6 +119,16 @@ def get_dashboard_stats(
         # For the current month extend end to now
         if i == 0:
             m_end = now
+        rev_adj = float(
+            db.query(func.sum(RevenueAdjustment.amount))
+            .filter(
+                RevenueAdjustment.user_id == user_id,
+                RevenueAdjustment.date >= m_start,
+                RevenueAdjustment.date < m_end,
+            )
+            .scalar() or 0
+        )
+        
         rev = float(
             db.query(func.sum(Quotation.grand_total))
             .join(Document, Document.id == Quotation.document_id)
@@ -114,7 +141,7 @@ def get_dashboard_stats(
             .scalar()
             or 0
         )
-        monthly_trend.append({"month": m_start.strftime("%b %y"), "revenue": rev})
+        monthly_trend.append({"month": m_start.strftime("%b %y"), "revenue": rev + rev_adj})
 
     # ── Recent 8 documents ────────────────────────────────────────────────────
     recent_docs = (

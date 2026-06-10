@@ -7,6 +7,7 @@ from app.utils.auth import get_current_user
 from app.models.user import User
 from app.models.document import Document, DocumentType, DocumentStatus
 import math
+import uuid
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
@@ -82,6 +83,7 @@ def search_documents(
 @router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_document(
     doc_id: str,
+    deduct_revenue: bool = Query(True, description="Whether to deduct quotation amount from revenue"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -111,6 +113,16 @@ def delete_document(
         entity = None
 
     if entity:
+        if document.document_type == DocumentType.QUOTATION and document.status == DocumentStatus.FINALIZED and not deduct_revenue:
+            from app.models.revenue_adjustment import RevenueAdjustment
+            adj = RevenueAdjustment(
+                id=str(uuid.uuid4()),
+                user_id=current_user.id,
+                amount=entity.grand_total,
+                description=f"Retained revenue from deleted quotation {document.document_number}"
+            )
+            db.add(adj)
+
         db.delete(entity)
 
     db.delete(document)

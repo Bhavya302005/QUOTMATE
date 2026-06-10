@@ -484,23 +484,23 @@ async def update_quotation(
 @router.delete("/{quotation_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_quotation(
     quotation_id: str,
+    deduct_revenue: bool = Query(True, description="Whether to deduct quotation amount from revenue"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Delete a quotation and all its line items"""
     # Find quotation with ownership check
-    quotation = db.query(Quotation).join(
-        Document, Quotation.document_id == Document.id
-    ).filter(
-        Quotation.id == quotation_id,
+    quotation = db.query(Quotation).filter(Quotation.id == quotation_id).first()
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+        
+    document = db.query(Document).filter(
+        Document.id == quotation.document_id,
         Document.user_id == current_user.id
     ).first()
     
-    if not quotation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Quotation not found"
-        )
+    if not document:
+        raise HTTPException(status_code=403, detail="Not authorized or document not found")
     
     # Audit log
     log_audit(
@@ -512,8 +512,20 @@ async def delete_quotation(
         old_value={"customer": quotation.customer_name, "grand_total": float(quotation.grand_total)}
     )
     
-    # Delete quotation (items will be cascade deleted)
+    if document.status == DocumentStatus.FINALIZED and not deduct_revenue:
+        from app.models.revenue_adjustment import RevenueAdjustment
+        import uuid
+        adj = RevenueAdjustment(
+            id=str(uuid.uuid4()),
+            user_id=current_user.id,
+            amount=quotation.grand_total,
+            description=f"Retained revenue from deleted quotation {document.document_number}"
+        )
+        db.add(adj)
+        
+    # Delete document (cascades to quotation)
     db.delete(quotation)
+    db.delete(document)
     db.commit()
     
     return None

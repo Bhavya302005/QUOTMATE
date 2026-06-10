@@ -196,7 +196,7 @@ export default function QuotationList() {
             <Link 
               key={quotation.id} 
               to={`/quotations/${quotation.id}`}
-              className="group block border border-black bg-surface-white p-4 sm:p-5 transition-colors duration-100 hover:bg-black hover:text-white cursor-pointer"
+              className="group block border border-black bg-surface-white p-4 sm:p-5 transition-colors duration-100 hover:bg-surface-container cursor-pointer"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -204,10 +204,10 @@ export default function QuotationList() {
                     {quotation.customer_name}
                   </h3>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="border border-black bg-white px-2 py-0.5 text-[9px] text-black group-hover:border-white group-hover:bg-black group-hover:text-white">
+                    <span className="border border-black bg-white px-2 py-0.5 text-[9px] text-black">
                       {quotation.quotation_number || quotation.id.slice(0, 8)}
                     </span>
-                    <span className="border border-black px-2 py-0.5 text-[9px] group-hover:border-white">
+                    <span className="border border-black px-2 py-0.5 text-[9px]">
                       {formatDate(quotation.created_at)}
                     </span>
                   </div>
@@ -218,14 +218,14 @@ export default function QuotationList() {
                   {quotation.status || 'draft'}
                 </span>
               </div>
-              <div className="flex items-end justify-between border-t border-black pt-4 group-hover:border-white">
+              <div className="flex items-end justify-between border-t border-black pt-4">
                 <span className="text-xl font-light tracking-tighter md:text-2xl">
                   {formatCurrency(quotation.grand_total)}
                 </span>
                 <div className="flex items-center gap-2">
                   <Link
                     to={`/quotations/${quotation.id}`}
-                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:!bg-white hover:!text-black group-hover:border-white group-hover:bg-black group-hover:text-white"
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-black hover:text-white"
                   >
                     <Eye className="h-4 w-4" strokeWidth={2} />
                   </Link>
@@ -235,7 +235,7 @@ export default function QuotationList() {
                       e.preventDefault();
                       handleDownload(quotation);
                     }}
-                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:!bg-white hover:!text-black group-hover:border-white group-hover:bg-black group-hover:text-white"
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-black hover:text-white"
                   >
                     <Download className="h-4 w-4" strokeWidth={2} />
                   </button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, ClipboardList, ChevronDown } from 'lucide-react';
 import { workOrderAPI } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner.jsx';
@@ -30,6 +30,7 @@ const STATUS_LABELS = {
 export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResumeDraft, onResumeEditDraft }) {
   const { user } = useAuth();
   const draftOwnerKey = user?.id || user?.email || 'anonymous';
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -73,7 +74,8 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
     try {
       await workOrderAPI.delete(id);
       toast.success('Work order deleted');
-      fetchWorkOrders();
+      queryClient.invalidateQueries({ queryKey: ['work_orders'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     } catch {
       toast.error('Failed to delete work order');
     }
@@ -189,27 +191,27 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
               onKeyDown={(e) => e.key === 'Enter' && onSelect(wo.id)}
               role="button"
               tabIndex={0}
-              className="group cursor-pointer border border-black bg-surface-white p-4 transition-colors duration-100 hover:bg-black hover:text-white sm:p-5"
+              className="group cursor-pointer border border-black bg-surface-white p-4 transition-colors duration-100 hover:bg-surface-container sm:p-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span className="border border-black bg-white px-2 py-0.5 text-[9px] text-black group-hover:border-white group-hover:bg-black group-hover:text-white">
+                    <span className="border border-black bg-white px-2 py-0.5 text-[9px] text-black">
                       {wo.work_order_number || wo.id.slice(0, 8)}
                     </span>
                     <span
-                      className={`border px-2 py-0.5 text-[9px] group-hover:border-white ${STATUS_STYLES[wo.status] || STATUS_STYLES.pending}`}
+                      className={`border px-2 py-0.5 text-[9px] ${STATUS_STYLES[wo.status] || STATUS_STYLES.pending}`}
                     >
                       {STATUS_LABELS[wo.status]}
                     </span>
                   </div>
                   <p className="truncate text-base font-normal  tracking-tight">{wo.client_name}</p>
-                  <div className="mt-2 space-y-1 border-l border-black pl-2 group-hover:border-white">
+                  <div className="mt-2 space-y-1 border-l border-black pl-2">
                     {wo.assigned_to && (
-                      <p className="text-outline-muted group-hover:text-white group-hover:opacity-80">{wo.assigned_to}</p>
+                      <p className="text-outline-muted">{wo.assigned_to}</p>
                     )}
                     {wo.start_date && (
-                      <p className="text-outline-muted group-hover:text-white group-hover:opacity-80">
+                      <p className="text-outline-muted">
                         {wo.start_date}
                         {wo.end_date ? ` → ${wo.end_date}` : ''}
                       </p>
@@ -225,7 +227,7 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, wo.id)}
-                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 group-hover:border-white group-hover:bg-black group-hover:text-white hover:!bg-error hover:!text-white"
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:!bg-error hover:!text-white"
                   >
                     <span className="text-sm" aria-hidden>
                       ×

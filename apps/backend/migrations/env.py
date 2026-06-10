@@ -16,7 +16,7 @@ sys.path.insert(0, str(backend_dir))
 from app.db.session import Base
 from app.core.config import settings
 # Import all models to ensure they're registered with Base
-from app.models import user, document, audit_log
+from app.models import user, document, audit_log, revenue_adjustment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, TrendingUp, FileText, ClipboardList, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
@@ -35,7 +35,9 @@ function statusBadge(status) {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(null);
+  const [docToDelete, setDocToDelete] = useState(null);
 
   const { data: queryData, isLoading: loading, refetch: loadDashboard } = useQuery({
     queryKey: ['dashboard'],
@@ -47,18 +49,26 @@ export default function DashboardPage() {
 
   const data = queryData || null;
 
-  const handleDeleteDoc = async (e, doc) => {
+  const confirmDelete = (e, doc) => {
     e.stopPropagation();
-    if (!window.confirm(`Delete "${doc.title || doc.document_number}"? This cannot be undone.`)) return;
-    setDeleting(doc.id);
+    setDocToDelete(doc);
+  };
+
+  const handleDeleteDoc = async (deductRevenue) => {
+    if (!docToDelete) return;
+    setDeleting(docToDelete.id);
     try {
-      await documentsAPI.delete(doc.id);
+      await documentsAPI.delete(docToDelete.id, deductRevenue);
       toast.success('Document deleted');
-      loadDashboard();
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['moms'] });
+      queryClient.invalidateQueries({ queryKey: ['work_orders'] });
     } catch {
       toast.error('Failed to delete document');
     } finally {
       setDeleting(null);
+      setDocToDelete(null);
     }
   };
 
@@ -238,7 +248,7 @@ export default function DashboardPage() {
                     <td className="px-4 py-4 text-right">
                       <button
                         type="button"
-                        onClick={(e) => handleDeleteDoc(e, doc)}
+                        onClick={(e) => confirmDelete(e, doc)}
                         disabled={deleting === doc.id}
                         className="inline-flex h-9 w-9 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-error hover:text-white disabled:opacity-40 group-hover:border-white group-hover:bg-black group-hover:text-white"
                         title="Delete"
@@ -266,6 +276,60 @@ export default function DashboardPage() {
           </p>
         </div>
       </footer>
+
+      {docToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md border border-black bg-surface-white p-6">
+            <h2 className="mb-4 text-xl font-light tracking-tight text-on-surface">Delete Document</h2>
+            <p className="mb-6 text-sm text-outline-muted">
+              Are you sure you want to delete "{docToDelete.title || docToDelete.document_number}"? This cannot be undone.
+            </p>
+            {docToDelete.document_type === 'quotation' && docToDelete.status === 'finalized' && (
+              <p className="mb-6 text-sm text-on-surface border-l-2 border-black pl-3 bg-surface-container py-2">
+                This is a finalized quotation. Do you want to deduct its amount from your monthly revenue?
+              </p>
+            )}
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setDocToDelete(null)}
+                className="border border-black bg-white px-4 py-2 text-sm transition-colors hover:bg-surface-container"
+              >
+                Cancel
+              </button>
+              {docToDelete.document_type === 'quotation' && docToDelete.status === 'finalized' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDoc(false)}
+                    disabled={deleting === docToDelete.id}
+                    className="border border-black bg-black px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+                  >
+                    Delete & Keep Revenue
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDoc(true)}
+                    disabled={deleting === docToDelete.id}
+                    className="border border-error bg-error px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+                  >
+                    Delete & Deduct
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteDoc(true)}
+                  disabled={deleting === docToDelete.id}
+                  className="border border-error bg-error px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+                >
+                  Delete Document
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

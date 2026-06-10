@@ -25,3 +25,4 @@ class User(Base):
     # Relationships
     documents = relationship("Document", back_populates="user", lazy="dynamic")
     products = relationship("Product", back_populates="user", lazy="dynamic")
+    revenue_adjustments = relationship("RevenueAdjustment", back_populates="user", lazy="dynamic")
