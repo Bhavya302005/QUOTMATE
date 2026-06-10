@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Trash2, TrendingUp, FileText, ClipboardList, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
@@ -34,21 +35,17 @@ function statusBadge(status) {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
 
-  const loadDashboard = () => {
-    dashboardAPI
-      .getStats()
-      .then((res) => setData(res.data))
-      .catch(() => toast.error('Failed to load dashboard'))
-      .finally(() => setLoading(false));
-  };
+  const { data: queryData, isLoading: loading, refetch: loadDashboard } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: async () => {
+      const res = await dashboardAPI.getStats();
+      return res.data;
+    },
+  });
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  const data = queryData || null;
 
   const handleDeleteDoc = async (e, doc) => {
     e.stopPropagation();
@@ -57,7 +54,6 @@ export default function DashboardPage() {
     try {
       await documentsAPI.delete(doc.id);
       toast.success('Document deleted');
-      setLoading(true);
       loadDashboard();
     } catch {
       toast.error('Failed to delete document');

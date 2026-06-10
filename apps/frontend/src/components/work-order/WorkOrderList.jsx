@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Plus, Search, ClipboardList, ChevronDown } from 'lucide-react';
 import { workOrderAPI } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner.jsx';
@@ -29,10 +30,7 @@ const STATUS_LABELS = {
 export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResumeDraft, onResumeEditDraft }) {
   const { user } = useAuth();
   const draftOwnerKey = user?.id || user?.email || 'anonymous';
-  const [workOrders, setWorkOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -43,27 +41,21 @@ export default function WorkOrderList({ onSelect, onNew, refreshTrigger, onResum
     return () => clearTimeout(timer);
   }, [search]);
 
-  const fetchWorkOrders = useCallback(async () => {
-    setLoading(true);
-    try {
+  const { data: queryData, isLoading: loading, refetch: fetchWorkOrders } = useQuery({
+    queryKey: ['workOrders', page, debouncedSearch, statusFilter, refreshTrigger],
+    queryFn: async () => {
       const resp = await workOrderAPI.list({
         page,
         page_size: 10,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
       });
-      setWorkOrders(resp.data?.items ?? []);
-      setTotalPages(resp.data?.total_pages ?? 1);
-    } catch {
-      toast.error('Failed to load work orders');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, debouncedSearch, statusFilter, refreshTrigger]);
+      return resp.data;
+    },
+  });
 
-  useEffect(() => {
-    fetchWorkOrders();
-  }, [fetchWorkOrders]);
+  const workOrders = queryData?.items ?? [];
+  const totalPages = queryData?.total_pages ?? 1;
 
   const newDraft = loadDraft('workorder', 'new', draftOwnerKey);
   const showNewDraft = newDraft?.updatedAt && workOrderDraftHasContent(newDraft);

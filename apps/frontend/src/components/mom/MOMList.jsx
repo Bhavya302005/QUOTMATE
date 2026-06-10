@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Download, Eye, Users, Plus, Search, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { momAPI, getApiErrorMessage } from '../../services/api';
@@ -31,29 +32,25 @@ function statusClass(status) {
 export default function MOMList() {
   const { user } = useAuth();
   const draftOwnerKey = user?.id || user?.email || 'anonymous';
-  const [moms, setMoms] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [draftVersion, setDraftVersion] = useState(0);
 
-  const loadMOMs = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await momAPI.list({ page: 1, page_size: 100, search: search || undefined });
-      setMoms(response.data?.items || []);
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to load MOMs'));
-      setMoms([]);
-    } finally {
-      setIsLoading(false);
-    }
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 250);
+    return () => clearTimeout(timer);
   }, [search]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => loadMOMs(), 250);
-    return () => clearTimeout(timer);
-  }, [loadMOMs]);
+  const { data: queryMoms = [], isLoading } = useQuery({
+    queryKey: ['moms', debouncedSearch],
+    queryFn: async () => {
+      const response = await momAPI.list({ page: 1, page_size: 100, search: debouncedSearch || undefined });
+      return response.data?.items || [];
+    },
+  });
+
+  const moms = queryMoms;
 
   const filteredMoms = useMemo(() => {
     if (statusFilter === 'all') return moms;

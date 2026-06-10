@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Download, Eye, FileText, Plus, Search, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { quotationAPI, getApiErrorMessage } from '../../services/api';
@@ -39,8 +40,6 @@ function statusClass(status) {
 export default function QuotationList() {
   const { user } = useAuth();
   const draftOwnerKey = user?.id || user?.email || 'anonymous';
-  const [quotations, setQuotations] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -51,22 +50,15 @@ export default function QuotationList() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const loadQuotations = useCallback(async () => {
-    setIsLoading(true);
-    try {
+  const { data: queryQuotations = [], isLoading } = useQuery({
+    queryKey: ['quotations', debouncedSearch],
+    queryFn: async () => {
       const response = await quotationAPI.list({ page: 1, page_size: 100, search: debouncedSearch || undefined });
-      setQuotations(response.data?.quotations || []);
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to load quotations'));
-      setQuotations([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [debouncedSearch]);
+      return response.data?.quotations || [];
+    },
+  });
 
-  useEffect(() => {
-    loadQuotations();
-  }, [loadQuotations]);
+  const quotations = queryQuotations;
 
   const filteredQuotations = useMemo(() => {
     if (statusFilter === 'all') return quotations;
