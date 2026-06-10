@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, TrendingUp, FileText, ClipboardList, Users } from 'lucide-react';
+import { Trash2, TrendingUp, FileText, ClipboardList, Users, Eye, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/common/LoadingSpinner.jsx';
-import { dashboardAPI, documentsAPI } from '../services/api.js';
+import { dashboardAPI, documentsAPI, quotationAPI, momAPI, workOrderAPI, getApiErrorMessage } from '../services/api.js';
 
 function fmt(n) {
   if (n === undefined || n === null) return '0';
@@ -58,7 +58,7 @@ export default function DashboardPage() {
     if (!docToDelete) return;
     setDeleting(docToDelete.id);
     try {
-      await documentsAPI.delete(docToDelete.id, deductRevenue);
+      await documentsAPI.delete(docToDelete.document_id, deductRevenue);
       toast.success('Document deleted');
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['quotations'] });
@@ -69,6 +69,31 @@ export default function DashboardPage() {
     } finally {
       setDeleting(null);
       setDocToDelete(null);
+    }
+  };
+
+  const handleDownload = async (e, doc) => {
+    e.stopPropagation();
+    try {
+      let response;
+      if (doc.document_type === 'quotation') {
+        response = await quotationAPI.download(doc.id);
+      } else if (doc.document_type === 'mom') {
+        response = await momAPI.download(doc.id);
+      } else if (doc.document_type === 'work_order') {
+        response = await workOrderAPI.download(doc.id);
+      } else {
+        return;
+      }
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${doc.title || doc.document_number || doc.id}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Download failed'));
     }
   };
 
@@ -230,7 +255,7 @@ export default function DashboardPage() {
                     }}
                   >
                     <td className="px-4 py-4 font-mono text-[11px] uppercase tracking-widest">
-                      {doc.document_number || doc.id?.slice(0, 8) || '—'}
+                      {doc.title || doc.document_number || doc.id?.slice(0, 8) || '—'}
                     </td>
                     <td className="px-4 py-4 text-xs uppercase">
                       {TYPE_LABEL[doc.document_type] || doc.document_type}
@@ -246,15 +271,37 @@ export default function DashboardPage() {
                       {relativeDate(doc.created_at)}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <button
-                        type="button"
-                        onClick={(e) => confirmDelete(e, doc)}
-                        disabled={deleting === doc.id}
-                        className="inline-flex h-9 w-9 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-error hover:text-white disabled:opacity-40 group-hover:border-white group-hover:bg-black group-hover:text-white"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" strokeWidth={2} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const base = routesByType[doc.document_type];
+                            navigate(base ? `${base}/${doc.id}` : '/dashboard');
+                          }}
+                          className="inline-flex h-9 w-9 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-black hover:text-white group-hover:border-white group-hover:bg-white group-hover:text-black"
+                          title="Preview"
+                        >
+                          <Eye className="h-4 w-4" strokeWidth={2} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDownload(e, doc)}
+                          className="inline-flex h-9 w-9 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-black hover:text-white group-hover:border-white group-hover:bg-white group-hover:text-black"
+                          title="Download"
+                        >
+                          <Download className="h-4 w-4" strokeWidth={2} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => confirmDelete(e, doc)}
+                          disabled={deleting === doc.id}
+                          className="inline-flex h-9 w-9 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-error hover:text-white disabled:opacity-40 group-hover:border-white group-hover:bg-error group-hover:text-white"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" strokeWidth={2} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

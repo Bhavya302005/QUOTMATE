@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Download, Eye, Users, Plus, Search, ChevronDown } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Download, Eye, Users, Plus, Search, ChevronDown, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { momAPI, getApiErrorMessage } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -36,6 +36,9 @@ export default function MOMList() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [draftVersion, setDraftVersion] = useState(0);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 250);
@@ -65,6 +68,28 @@ export default function MOMList() {
     clearDraft('mom', slot, draftOwnerKey);
     setDraftVersion((v) => v + 1);
     toast.success('Draft removed');
+  };
+
+  const confirmDelete = (e, mom) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDocToDelete(mom);
+  };
+
+  const handleDelete = async () => {
+    if (!docToDelete) return;
+    setIsDeleting(true);
+    try {
+      await momAPI.delete(docToDelete.id);
+      toast.success('MOM deleted');
+      queryClient.invalidateQueries({ queryKey: ['moms'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to delete MOM'));
+    } finally {
+      setIsDeleting(false);
+      setDocToDelete(null);
+    }
   };
 
   const handleDownload = async (mom) => {
@@ -224,6 +249,13 @@ export default function MOMList() {
                   >
                     <Download className="h-4 w-4" strokeWidth={2} />
                   </button>
+                  <button
+                    type="button"
+                    onClick={(e) => confirmDelete(e, mom)}
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-error hover:text-white"
+                  >
+                    <Trash2 className="h-4 w-4" strokeWidth={2} />
+                  </button>
                 </div>
               </div>
             </Link>
@@ -236,6 +268,34 @@ export default function MOMList() {
           <Plus className="h-7 w-7" strokeWidth={2} />
         </div>
       </Link>
+
+      {docToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md border border-black bg-surface-white p-6">
+            <h2 className="mb-4 text-xl font-light tracking-tight text-on-surface">Delete MOM</h2>
+            <p className="mb-6 text-sm text-outline-muted">
+              Are you sure you want to delete "{docToDelete.meeting_title || docToDelete.mom_number}"? This cannot be undone.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setDocToDelete(null)}
+                className="border border-black bg-white px-4 py-2 text-sm transition-colors hover:bg-surface-container"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="border border-error bg-error px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+              >
+                Delete MOM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Download, Eye, FileText, Plus, Search, ChevronDown } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Download, Eye, FileText, Plus, Search, ChevronDown, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { quotationAPI, getApiErrorMessage } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -44,6 +44,9 @@ export default function QuotationList() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [draftVersion, setDraftVersion] = useState(0);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 250);
@@ -80,6 +83,28 @@ export default function QuotationList() {
     clearDraft('quotation', slot, draftOwnerKey);
     setDraftVersion((v) => v + 1);
     toast.success('Draft removed');
+  };
+
+  const confirmDelete = (e, quotation) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDocToDelete(quotation);
+  };
+
+  const handleDelete = async (deductRevenue = true) => {
+    if (!docToDelete) return;
+    setIsDeleting(true);
+    try {
+      await quotationAPI.delete(docToDelete.id, deductRevenue);
+      toast.success('Quotation deleted');
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to delete quotation'));
+    } finally {
+      setIsDeleting(false);
+      setDocToDelete(null);
+    }
   };
 
   const handleDownload = async (quotation) => {
@@ -239,6 +264,13 @@ export default function QuotationList() {
                   >
                     <Download className="h-4 w-4" strokeWidth={2} />
                   </button>
+                  <button
+                    type="button"
+                    onClick={(e) => confirmDelete(e, quotation)}
+                    className="flex h-10 w-10 items-center justify-center border border-black bg-white text-on-surface transition-colors duration-100 hover:bg-error hover:text-white"
+                  >
+                    <Trash2 className="h-4 w-4" strokeWidth={2} />
+                  </button>
                 </div>
               </div>
             </Link>
@@ -251,6 +283,60 @@ export default function QuotationList() {
           <Plus className="h-7 w-7" strokeWidth={2} />
         </div>
       </Link>
+
+      {docToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md border border-black bg-surface-white p-6">
+            <h2 className="mb-4 text-xl font-light tracking-tight text-on-surface">Delete Quotation</h2>
+            <p className="mb-6 text-sm text-outline-muted">
+              Are you sure you want to delete "{docToDelete.customer_name || docToDelete.quotation_number}"? This cannot be undone.
+            </p>
+            {docToDelete.status === 'finalized' && (
+              <p className="mb-6 text-sm text-on-surface border-l-2 border-black pl-3 bg-surface-container py-2">
+                This is a finalized quotation. Do you want to deduct its amount from your monthly revenue?
+              </p>
+            )}
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setDocToDelete(null)}
+                className="border border-black bg-white px-4 py-2 text-sm transition-colors hover:bg-surface-container"
+              >
+                Cancel
+              </button>
+              {docToDelete.status === 'finalized' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(false)}
+                    disabled={isDeleting}
+                    className="border border-black bg-black px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+                  >
+                    Delete & Keep Revenue
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(true)}
+                    disabled={isDeleting}
+                    className="border border-error bg-error px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+                  >
+                    Delete & Deduct
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(true)}
+                  disabled={isDeleting}
+                  className="border border-error bg-error px-4 py-2 text-sm text-white transition-colors hover:opacity-80 disabled:opacity-50"
+                >
+                  Delete Quotation
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
